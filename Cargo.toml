@@ -11,4 +11,5 @@ readme = true
 publish = true
 
 [dependencies]
+bitflags = { version = "2" }
 thiserror = { version = "1" }
