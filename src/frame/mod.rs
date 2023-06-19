@@ -5,7 +5,7 @@ pub use body::*;
 pub use header::*;
 
 #[derive(Debug)]
-pub struct RSocketFrame {
-    header: RSocketFrameHeader,
-    body: RSocketFrameBody,
+pub struct Frame {
+    header: FrameHeader,
+    body: FrameBody,
 }

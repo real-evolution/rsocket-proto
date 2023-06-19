@@ -1,6 +1,6 @@
 bitflags::bitflags! {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    pub struct RSocketFlags: u16 {
+    pub struct Flags: u16 {
         const NEXT = 1 << 5;
         const COMPLETE = 1 << 6;
         const FOLLOW = 1 << 7;
@@ -12,16 +12,16 @@ bitflags::bitflags! {
     }
 }
 
-impl From<u16> for RSocketFlags {
+impl From<u16> for Flags {
     #[inline(always)]
     fn from(value: u16) -> Self {
         Self::from_bits_retain(value)
     }
 }
 
-impl From<RSocketFlags> for u16 {
+impl From<Flags> for u16 {
     #[inline(always)]
-    fn from(value: RSocketFlags) -> Self {
+    fn from(value: Flags) -> Self {
         value.bits()
     }
 }

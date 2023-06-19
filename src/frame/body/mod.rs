@@ -1,4 +1,4 @@
 #[derive(Debug)]
-pub enum RSocketFrameBody {
+pub enum FrameBody {
 
 }

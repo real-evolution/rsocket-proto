@@ -15,7 +15,7 @@ const FRAME_TYPE_RESUME_OK: u8 = 0x0E;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum RSocketFrameType {
+pub enum FrameType {
     Setup = FRAME_TYPE_SETUP,
     Lease = FRAME_TYPE_LEASE,
     Keepalive = FRAME_TYPE_KEEPALIVE,
@@ -33,48 +33,48 @@ pub enum RSocketFrameType {
     Other(u8),
 }
 
-impl From<u8> for RSocketFrameType {
+impl From<u8> for FrameType {
     #[inline(always)]
     fn from(value: u8) -> Self {
         match value {
-            | FRAME_TYPE_SETUP => RSocketFrameType::Setup,
-            | FRAME_TYPE_LEASE => RSocketFrameType::Lease,
-            | FRAME_TYPE_KEEPALIVE => RSocketFrameType::Keepalive,
-            | FRAME_TYPE_REQUEST_RESPONSE => RSocketFrameType::RequestResponse,
-            | FRAME_TYPE_REQUEST_FNF => RSocketFrameType::RequestFNF,
-            | FRAME_TYPE_REQUEST_STREAM => RSocketFrameType::RequestStream,
-            | FRAME_TYPE_REQUEST_CHANNEL => RSocketFrameType::RequestChannel,
-            | FRAME_TYPE_REQUEST_N => RSocketFrameType::RequestN,
-            | FRAME_TYPE_CANCEL => RSocketFrameType::Cancel,
-            | FRAME_TYPE_PAYLOAD => RSocketFrameType::Payload,
-            | FRAME_TYPE_ERROR => RSocketFrameType::Error,
-            | FRAME_TYPE_METADATA_PUSH => RSocketFrameType::MetadataPush,
-            | FRAME_TYPE_RESUME => RSocketFrameType::Resume,
-            | FRAME_TYPE_RESUME_OK => RSocketFrameType::ResumeOk,
-            | v => RSocketFrameType::Other(v),
+            | FRAME_TYPE_SETUP => FrameType::Setup,
+            | FRAME_TYPE_LEASE => FrameType::Lease,
+            | FRAME_TYPE_KEEPALIVE => FrameType::Keepalive,
+            | FRAME_TYPE_REQUEST_RESPONSE => FrameType::RequestResponse,
+            | FRAME_TYPE_REQUEST_FNF => FrameType::RequestFNF,
+            | FRAME_TYPE_REQUEST_STREAM => FrameType::RequestStream,
+            | FRAME_TYPE_REQUEST_CHANNEL => FrameType::RequestChannel,
+            | FRAME_TYPE_REQUEST_N => FrameType::RequestN,
+            | FRAME_TYPE_CANCEL => FrameType::Cancel,
+            | FRAME_TYPE_PAYLOAD => FrameType::Payload,
+            | FRAME_TYPE_ERROR => FrameType::Error,
+            | FRAME_TYPE_METADATA_PUSH => FrameType::MetadataPush,
+            | FRAME_TYPE_RESUME => FrameType::Resume,
+            | FRAME_TYPE_RESUME_OK => FrameType::ResumeOk,
+            | v => FrameType::Other(v),
         }
     }
 }
 
-impl From<RSocketFrameType> for u8 {
+impl From<FrameType> for u8 {
     #[inline(always)]
-    fn from(value: RSocketFrameType) -> Self {
+    fn from(value: FrameType) -> Self {
         match value {
-            | RSocketFrameType::Setup => FRAME_TYPE_SETUP,
-            | RSocketFrameType::Lease => FRAME_TYPE_LEASE,
-            | RSocketFrameType::Keepalive => FRAME_TYPE_KEEPALIVE,
-            | RSocketFrameType::RequestResponse => FRAME_TYPE_REQUEST_RESPONSE,
-            | RSocketFrameType::RequestFNF => FRAME_TYPE_REQUEST_FNF,
-            | RSocketFrameType::RequestStream => FRAME_TYPE_REQUEST_STREAM,
-            | RSocketFrameType::RequestChannel => FRAME_TYPE_REQUEST_CHANNEL,
-            | RSocketFrameType::RequestN => FRAME_TYPE_REQUEST_N,
-            | RSocketFrameType::Cancel => FRAME_TYPE_CANCEL,
-            | RSocketFrameType::Payload => FRAME_TYPE_PAYLOAD,
-            | RSocketFrameType::Error => FRAME_TYPE_ERROR,
-            | RSocketFrameType::MetadataPush => FRAME_TYPE_METADATA_PUSH,
-            | RSocketFrameType::Resume => FRAME_TYPE_RESUME,
-            | RSocketFrameType::ResumeOk => FRAME_TYPE_RESUME_OK,
-            | RSocketFrameType::Other(v) => v,
+            | FrameType::Setup => FRAME_TYPE_SETUP,
+            | FrameType::Lease => FRAME_TYPE_LEASE,
+            | FrameType::Keepalive => FRAME_TYPE_KEEPALIVE,
+            | FrameType::RequestResponse => FRAME_TYPE_REQUEST_RESPONSE,
+            | FrameType::RequestFNF => FRAME_TYPE_REQUEST_FNF,
+            | FrameType::RequestStream => FRAME_TYPE_REQUEST_STREAM,
+            | FrameType::RequestChannel => FRAME_TYPE_REQUEST_CHANNEL,
+            | FrameType::RequestN => FRAME_TYPE_REQUEST_N,
+            | FrameType::Cancel => FRAME_TYPE_CANCEL,
+            | FrameType::Payload => FRAME_TYPE_PAYLOAD,
+            | FrameType::Error => FRAME_TYPE_ERROR,
+            | FrameType::MetadataPush => FRAME_TYPE_METADATA_PUSH,
+            | FrameType::Resume => FRAME_TYPE_RESUME,
+            | FrameType::ResumeOk => FRAME_TYPE_RESUME_OK,
+            | FrameType::Other(v) => v,
         }
     }
 }
