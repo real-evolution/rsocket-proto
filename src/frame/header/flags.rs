@@ -13,12 +13,14 @@ bitflags::bitflags! {
 }
 
 impl From<u16> for RSocketFlags {
+    #[inline(always)]
     fn from(value: u16) -> Self {
         Self::from_bits_retain(value)
     }
 }
 
 impl From<RSocketFlags> for u16 {
+    #[inline(always)]
     fn from(value: RSocketFlags) -> Self {
         value.bits()
     }

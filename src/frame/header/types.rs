@@ -34,6 +34,7 @@ pub enum RSocketFrameType {
 }
 
 impl From<u8> for RSocketFrameType {
+    #[inline(always)]
     fn from(value: u8) -> Self {
         match value {
             | FRAME_TYPE_SETUP => RSocketFrameType::Setup,
@@ -56,6 +57,7 @@ impl From<u8> for RSocketFrameType {
 }
 
 impl From<RSocketFrameType> for u8 {
+    #[inline(always)]
     fn from(value: RSocketFrameType) -> Self {
         match value {
             | RSocketFrameType::Setup => FRAME_TYPE_SETUP,
