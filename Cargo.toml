@@ -12,4 +12,5 @@ publish = true
 
 [dependencies]
 bitflags = { version = "2" }
+nom = { version = "7" }
 thiserror = { version = "1" }
