@@ -11,3 +11,15 @@ bitflags::bitflags! {
         const RESPOND = Self::FOLLOW.bits();
     }
 }
+
+impl From<u16> for RSocketFlag {
+    fn from(value: u16) -> Self {
+        Self::from_bits_retain(value)
+    }
+}
+
+impl From<RSocketFlag> for u16 {
+    fn from(value: RSocketFlag) -> Self {
+        value.bits()
+    }
+}
