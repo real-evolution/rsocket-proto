@@ -8,15 +8,10 @@ use nom::{
 use crate::frame::{Flags, FrameHeader};
 
 #[inline(always)]
-pub(super) fn metadata(input: &[u8]) -> nom::IResult<&[u8], &[u8]> {
-    length_data(be_u24)(input)
-}
-
-#[inline(always)]
 pub(super) fn metadata_opt<'a>(
     header: &FrameHeader,
 ) -> impl Parser<&'a [u8], Option<&'a [u8]>, nom::error::Error<&'a [u8]>> {
-    cond(header.flags.contains(Flags::METADATA), metadata)
+    cond(header.flags.contains(Flags::METADATA), length_data(be_u24))
 }
 
 #[inline(always)]
