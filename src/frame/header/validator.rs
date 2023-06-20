@@ -13,14 +13,14 @@ impl<'a> FrameHeaderValidator<'a> {
 
     #[inline(always)]
     pub(crate) fn flags_match_mask(self, mask: Flags) -> RSocketResult<Self> {
-        if !self.0.flags.matches_mask(mask) {
-            return Err(RSocketError::UnexpectedFlags {
-                flags: self.0.flags,
-                mask,
-            });
+        if self.0.flags.matches_mask(mask) {
+            return Ok(self);
         }
 
-        Ok(self)
+        Err(RSocketError::UnexpectedFlags {
+            flags: self.0.flags,
+            mask,
+        })
     }
 
     #[inline(always)]
@@ -34,26 +34,26 @@ impl<'a> FrameHeaderValidator<'a> {
         flag: Flags,
         expected_value: bool,
     ) -> RSocketResult<Self> {
-        if !self.0.flags.contains(flag) {
-            return Err(RSocketError::UnexpectedFlagValue {
-                flag,
-                expected_value,
-            });
+        if self.0.flags.contains(flag) {
+            return Ok(self);
         }
 
-        Ok(self)
+        Err(RSocketError::UnexpectedFlagValue {
+            flag,
+            expected_value,
+        })
     }
 
     #[inline(always)]
     pub(crate) fn in_stream(self, stream_id: u32) -> RSocketResult<Self> {
-        if self.0.stream_id != 0 {
-            return Err(RSocketError::UnexpectedStreamId {
-                expected: stream_id,
-                actual: self.0.stream_id,
-            });
+        if self.0.stream_id == 0 {
+            return Ok(self);
         }
 
-        Ok(self)
+        Err(RSocketError::UnexpectedStreamId {
+            expected: stream_id,
+            actual: self.0.stream_id,
+        })
     }
 
     #[inline(always)]

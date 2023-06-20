@@ -13,6 +13,7 @@ impl u24 {
     pub const MIN: u32 = 0x0000_0000;
     pub const MAX: u32 = 0x00FF_FFFF;
 
+    #[inline(always)]
     pub fn decode(input: &[u8]) -> IResult<&[u8], Self> {
         map(be_u24, Into::into)(input)
     }

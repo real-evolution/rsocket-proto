@@ -7,21 +7,24 @@ pub struct Version {
 }
 
 impl Default for Version {
+    #[inline(always)]
     fn default() -> Version {
         Version { major: 1, minor: 0 }
     }
 }
 
 impl From<u32> for Version {
+    #[inline(always)]
     fn from(value: u32) -> Self {
-        let major = (value >> 16) as u16;
-        let minor = (value & 0xffff) as u16;
-
-        Self { major, minor }
+        Self {
+            major: (value >> 16) as u16,
+            minor: (value & 0xffff) as u16,
+        }
     }
 }
 
 impl From<Version> for u32 {
+    #[inline(always)]
     fn from(value: Version) -> Self {
         ((value.major as u32) << 16) | (value.minor as u32)
     }
