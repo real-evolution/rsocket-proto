@@ -1,7 +1,5 @@
 use nom::{combinator::map, number::complete::be_u32};
 
-use super::parse::Parsable;
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Version {
     pub major: u16,
@@ -29,9 +27,9 @@ impl From<Version> for u32 {
     }
 }
 
-impl Parsable for Version {
+impl Version {
     #[inline(always)]
-    fn parse(input: &[u8]) -> nom::IResult<&[u8], Self> {
+    pub(super) fn parse(input: &[u8]) -> nom::IResult<&[u8], Self> {
         map(be_u32, |ver| ver.into())(input)
     }
 }

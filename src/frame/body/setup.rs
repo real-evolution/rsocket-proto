@@ -6,7 +6,7 @@ use nom::multi::length_data;
 use nom::number::complete::{be_u16, be_u32, be_u8};
 use nom::sequence::tuple;
 
-use super::parse::{BodyCodec, Parsable};
+use super::parse::BodyCodec;
 use super::util::{length_utf8, metadata_opt, rest_opt};
 use super::version::Version;
 use crate::frame::{Flags, FrameHeader};

@@ -2,10 +2,6 @@ use std::io::Write;
 
 use crate::frame::FrameHeader;
 
-pub(super) trait Parsable: Sized {
-    fn parse(input: &[u8]) -> nom::IResult<&[u8], Self>;
-}
-
 pub(super) trait BodyCodec<'a>: Sized {
     fn decode(
         header: &FrameHeader,
