@@ -18,7 +18,7 @@ pub struct FrameHeader {
 
 impl FrameHeader {
     #[inline(always)]
-    pub(crate) fn parse(input: &[u8]) -> IResult<&[u8], FrameHeader> {
+    pub(crate) fn decode(input: &[u8]) -> IResult<&[u8], FrameHeader> {
         map(tuple((be_u32, be_u16)), |(stream_id, rem)| Self {
             stream_id,
             frame_type: ((rem >> 10) as u8).into(),
