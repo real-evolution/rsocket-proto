@@ -10,4 +10,6 @@ pub use primitives::*;
 pub struct Frame<'a> {
     pub header: FrameHeader,
     pub body: FrameBody<'a>,
+    pub raw: &'a [u8],
 }
+
