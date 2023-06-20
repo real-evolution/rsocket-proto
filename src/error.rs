@@ -16,6 +16,9 @@ pub enum RSocketError {
     #[error("invalid buffer size: {0}")]
     BufferLength(&'static str),
 
+    #[error("unexpected frame type: 0x{0:02X}")]
+    UnknownFrameType(u8),
+
     #[error("invalid stream identifier: expected 0x{expected:08X}, got 0x{actual:08X}")]
     UnexpectedStreamId { expected: u32, actual: u32 },
 
