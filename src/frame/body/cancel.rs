@@ -1,7 +1,7 @@
 use super::codec::EmptyBody;
 use crate::{error::RSocketResult, frame::FrameHeader};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Cancel;
 
 impl EmptyBody for Cancel {
