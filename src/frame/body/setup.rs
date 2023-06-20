@@ -9,6 +9,7 @@ use nom::sequence::tuple;
 use super::codec::BodyCodec;
 use super::util::{length_utf8, metadata_opt, rest_opt};
 use super::version::Version;
+use crate::error::RSocketResult;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
@@ -50,5 +51,13 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
 
     fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header
+            .validate()
+            .flags_match_mask(Flags::METADATA | Flags::RESUME | Flags::LEASE)?
+            .in_stream(0)?
+            .done()
     }
 }

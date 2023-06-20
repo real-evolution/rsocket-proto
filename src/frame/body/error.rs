@@ -9,7 +9,7 @@ use nom::{
 };
 
 use super::{codec::BodyCodec, util::rest_utf8};
-use crate::frame::FrameHeader;
+use crate::{error::RSocketResult, frame::FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct Error<'a> {
@@ -43,5 +43,9 @@ impl<'a> BodyCodec<'a> for Error<'a> {
 
     fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header.validate().has_empty_flags()?.done()
     }
 }

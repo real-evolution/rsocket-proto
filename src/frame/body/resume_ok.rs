@@ -2,7 +2,7 @@ use derive_more::From;
 use nom::{combinator::map, number::complete::be_u64};
 
 use super::codec::BodyCodec;
-use crate::frame::FrameHeader;
+use crate::{error::RSocketResult, frame::FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct ResumeOk {
@@ -22,5 +22,9 @@ impl<'a> BodyCodec<'a> for ResumeOk {
         _writer: &mut W,
     ) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header.validate().has_empty_flags()?.done()
     }
 }

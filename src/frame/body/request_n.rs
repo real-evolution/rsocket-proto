@@ -5,7 +5,7 @@ use nom::{
 };
 
 use super::codec::BodyCodec;
-use crate::frame::FrameHeader;
+use crate::{error::RSocketResult, frame::FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct RequestN {
@@ -25,5 +25,9 @@ impl<'a> BodyCodec<'a> for RequestN {
         _writer: &mut W,
     ) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header.validate().has_empty_flags()?.done()
     }
 }

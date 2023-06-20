@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crate::frame::FrameHeader;
+use crate::{error::RSocketResult, frame::FrameHeader};
 
 pub(super) trait BodyCodec<'a>: Sized {
     fn decode(
@@ -9,9 +9,19 @@ pub(super) trait BodyCodec<'a>: Sized {
     ) -> nom::IResult<&'a [u8], Self>;
 
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()>;
+
+    #[inline(always)]
+    fn validate_header(_header: &FrameHeader) -> RSocketResult<()> {
+        Ok(())
+    }
 }
 
-pub(super) trait EmptyBody: Sized {}
+pub(super) trait EmptyBody: Sized {
+    #[inline(always)]
+    fn validate_header(_header: &FrameHeader) -> RSocketResult<()> {
+        Ok(())
+    }
+}
 
 impl<'a, T> BodyCodec<'a> for T
 where
@@ -28,5 +38,10 @@ where
     #[inline(always)]
     fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {
         Ok(())
+    }
+
+    #[inline(always)]
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        <Self as EmptyBody>::validate_header(header)
     }
 }

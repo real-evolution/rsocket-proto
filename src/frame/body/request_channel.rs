@@ -6,7 +6,10 @@ use nom::{
 };
 
 use super::{codec::BodyCodec, util::metadata_opt};
-use crate::frame::FrameHeader;
+use crate::{
+    error::RSocketResult,
+    frame::{Flags, FrameHeader},
+};
 
 #[derive(Debug, Clone, From)]
 pub struct RequestChannel<'a> {
@@ -32,5 +35,14 @@ impl<'a> BodyCodec<'a> for RequestChannel<'a> {
         _writer: &mut W,
     ) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header
+            .validate()
+            .flags_match_mask(
+                Flags::METADATA | Flags::FOLLOW | Flags::COMPLETE,
+            )?
+            .done()
     }
 }

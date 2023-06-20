@@ -2,7 +2,10 @@ use derive_more::From;
 use nom::combinator::{map, rest};
 
 use super::codec::BodyCodec;
-use crate::frame::FrameHeader;
+use crate::{
+    error::RSocketResult,
+    frame::{Flags, FrameHeader},
+};
 
 #[derive(Debug, Clone, From)]
 pub struct MetadataPush<'a> {
@@ -22,5 +25,9 @@ impl<'a> BodyCodec<'a> for MetadataPush<'a> {
         _writer: &mut W,
     ) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header.validate().flag_is(Flags::METADATA, true)?.done()
     }
 }

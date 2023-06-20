@@ -5,7 +5,10 @@ use nom::{
 };
 
 use super::{codec::BodyCodec, util::metadata_opt};
-use crate::frame::FrameHeader;
+use crate::{
+    error::RSocketResult,
+    frame::{Flags, FrameHeader},
+};
 
 #[derive(Debug, Clone, From)]
 pub struct RequestFNF<'a> {
@@ -21,7 +24,17 @@ impl<'a> BodyCodec<'a> for RequestFNF<'a> {
         into(tuple((metadata_opt(header), rest)))(input)
     }
 
-    fn encode<W: std::io::Write>(&self, _writer: &mut W) -> std::io::Result<()> {
+    fn encode<W: std::io::Write>(
+        &self,
+        _writer: &mut W,
+    ) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header
+            .validate()
+            .flags_match_mask(Flags::METADATA | Flags::FOLLOW)?
+            .done()
     }
 }

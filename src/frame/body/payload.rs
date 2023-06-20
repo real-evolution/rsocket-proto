@@ -5,7 +5,10 @@ use nom::{
 };
 
 use super::{codec::BodyCodec, util::metadata_opt};
-use crate::frame::{Flags, FrameHeader};
+use crate::{
+    error::RSocketResult,
+    frame::{Flags, FrameHeader},
+};
 
 #[derive(Debug, Clone, From)]
 pub struct Payload<'a> {
@@ -29,5 +32,14 @@ impl<'a> BodyCodec<'a> for Payload<'a> {
         _writer: &mut W,
     ) -> std::io::Result<()> {
         todo!()
+    }
+
+    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
+        header
+            .validate()
+            .flags_match_mask(
+                Flags::METADATA | Flags::FOLLOW | Flags::COMPLETE | Flags::NEXT,
+            )?
+            .done()
     }
 }
