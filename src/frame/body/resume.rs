@@ -35,6 +35,6 @@ impl<'a> BodyCodec<'a> for Resume<'a> {
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header.validate().has_empty_flags()?.done()
+        header.validate().has_empty_flags()?.in_stream(0)?.done()
     }
 }
