@@ -34,10 +34,9 @@ pub use resume_ok::ResumeOk;
 pub use setup::Setup;
 pub use version::Version;
 
-use derive_more::From;
+pub(crate) use codec::BodyCodec;
 
-use super::FrameType;
-use crate::frame::body::codec::BodyCodec;
+use derive_more::From;
 
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {
@@ -56,48 +55,4 @@ pub enum FrameBody<'a> {
     Ext(Ext<'a>),
     Resume(Resume<'a>),
     ResumeOk(ResumeOk),
-}
-
-impl<'a> FrameBody<'a> {
-    pub(super) fn decode(
-        header: &super::FrameHeader,
-        input: &'a [u8],
-    ) -> nom::IResult<&'a [u8], Self> {
-        #[inline(always)]
-        fn decode<'a, C>(
-            header: &super::FrameHeader,
-            input: &'a [u8],
-        ) -> nom::IResult<&'a [u8], FrameBody<'a>>
-        where
-            C: BodyCodec<'a> + Into<FrameBody<'a>>,
-        {
-            let (rest, body) = C::decode(header, input)?;
-
-            Ok((rest, body.into()))
-        }
-
-        match header.frame_type {
-            | FrameType::Setup => decode::<Setup>(header, input),
-            | FrameType::Lease => decode::<Lease>(header, input),
-            | FrameType::Keepalive => decode::<Keepalive>(header, input),
-            | FrameType::RequestResponse => {
-                decode::<RequestResponse>(header, input)
-            }
-            | FrameType::RequestFNF => decode::<RequestFNF>(header, input),
-            | FrameType::RequestStream => {
-                decode::<RequestStream>(header, input)
-            }
-            | FrameType::RequestChannel => {
-                decode::<RequestChannel>(header, input)
-            }
-            | FrameType::RequestN => decode::<RequestChannel>(header, input),
-            | FrameType::Cancel => decode::<Cancel>(header, input),
-            | FrameType::Payload => decode::<Payload>(header, input),
-            | FrameType::Error => decode::<Error>(header, input),
-            | FrameType::MetadataPush => decode::<MetadataPush>(header, input),
-            | FrameType::Resume => decode::<Resume>(header, input),
-            | FrameType::ResumeOk => decode::<ResumeOk>(header, input),
-            | FrameType::Other(_) => unreachable!(),
-        }
-    }
 }
