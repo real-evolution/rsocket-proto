@@ -4,7 +4,7 @@ use nom::{
     number::complete::be_u32,
 };
 
-use super::parse::BodyCodec;
+use super::codec::BodyCodec;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]

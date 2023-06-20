@@ -6,7 +6,7 @@ use nom::{
     sequence::tuple,
 };
 
-use super::{parse::BodyCodec, Version};
+use super::{codec::BodyCodec, Version};
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]

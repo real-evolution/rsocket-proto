@@ -2,7 +2,7 @@ use derive_more::From;
 use nom::{combinator::into, number::complete::be_u32, sequence::tuple};
 
 use super::{
-    parse::BodyCodec,
+    codec::BodyCodec,
     util::{metadata_opt, rest_opt},
 };
 use crate::frame::FrameHeader;

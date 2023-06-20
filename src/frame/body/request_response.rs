@@ -4,7 +4,7 @@ use nom::{
     sequence::tuple,
 };
 
-use super::{parse::BodyCodec, util::metadata_opt};
+use super::{codec::BodyCodec, util::metadata_opt};
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]

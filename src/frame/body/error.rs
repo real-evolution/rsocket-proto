@@ -8,7 +8,7 @@ use nom::{
     sequence::tuple,
 };
 
-use super::{parse::BodyCodec, util::rest_utf8};
+use super::{codec::BodyCodec, util::rest_utf8};
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]

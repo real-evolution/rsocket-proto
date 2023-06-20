@@ -1,4 +1,4 @@
-use super::parse::EmptyBody;
+use super::codec::EmptyBody;
 
 #[derive(Debug, Clone)]
 pub struct Cancel;

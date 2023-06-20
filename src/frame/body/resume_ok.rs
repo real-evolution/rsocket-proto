@@ -1,7 +1,7 @@
 use derive_more::From;
 use nom::{combinator::map, number::complete::be_u64};
 
-use super::parse::BodyCodec;
+use super::codec::BodyCodec;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]
