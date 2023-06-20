@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use thiserror::Error;
 
 use crate::frame::Flags;
@@ -10,10 +11,10 @@ pub type RSocketResult<T> = Result<T, RSocketError>;
 #[derive(Debug, Error)]
 pub enum RSocketError {
     #[error("invalid stream identifier: expected 0x{expected:08X}, got 0x{actual:08X}")]
-    InvalidStreamId { expected: u32, actual: u32 },
+    UnexpectedStreamId { expected: u32, actual: u32 },
 
     #[error("invalid flags value: 0x{flags:04X}, mask = 0x{mask:04X}")]
-    InvalidFlags { flags: Flags, mask: Flags },
+    UnexpectedFlags { flags: Flags, mask: Flags },
 
     #[error("unexpected flag value: {flag:?}, expected = {expected_value}")]
     UnexpectedFlagValue { flag: Flags, expected_value: bool },

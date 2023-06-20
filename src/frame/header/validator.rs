@@ -14,7 +14,7 @@ impl<'a> FrameHeaderValidator<'a> {
     #[inline(always)]
     pub(crate) fn flags_match_mask(self, mask: Flags) -> RSocketResult<Self> {
         if !self.0.flags.matches_mask(mask) {
-            return Err(RSocketError::InvalidFlags {
+            return Err(RSocketError::UnexpectedFlags {
                 flags: self.0.flags,
                 mask,
             });
@@ -47,7 +47,7 @@ impl<'a> FrameHeaderValidator<'a> {
     #[inline(always)]
     pub(crate) fn in_stream(self, stream_id: u32) -> RSocketResult<Self> {
         if self.0.stream_id != 0 {
-            return Err(RSocketError::InvalidStreamId {
+            return Err(RSocketError::UnexpectedStreamId {
                 expected: stream_id,
                 actual: self.0.stream_id,
             });
