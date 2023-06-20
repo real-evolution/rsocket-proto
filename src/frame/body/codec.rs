@@ -2,7 +2,7 @@ use std::io::Write;
 
 use crate::{error::RSocketResult, frame::FrameHeader};
 
-pub(super) trait BodyCodec<'a>: Sized {
+pub(crate) trait BodyCodec<'a>: Sized {
     fn decode(
         header: &FrameHeader,
         input: &'a [u8],
