@@ -12,6 +12,12 @@ bitflags::bitflags! {
     }
 }
 
+impl Flags {
+    pub fn matches_mask(&self, mask: Flags) -> bool {
+        (*self & mask) == *self
+    }
+}
+
 impl From<u16> for Flags {
     #[inline(always)]
     fn from(value: u16) -> Self {
