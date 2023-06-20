@@ -13,5 +13,6 @@ publish = true
 [dependencies]
 bitflags = { version = "2" }
 derive_more = { version = "0" }
+from-to-repr = { version = "0", features = ["from_to_other"] }
 nom = { version = "7" }
 thiserror = { version = "1" }
