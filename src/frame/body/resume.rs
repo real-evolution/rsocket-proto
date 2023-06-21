@@ -1,13 +1,15 @@
 use derive_more::From;
 use nom::{
-    combinator::into,
     multi::length_data,
     number::complete::{be_u16, be_u64},
     sequence::tuple,
 };
 
 use super::{codec::BodyCodec, Version};
-use crate::{frame::FrameHeader, error::RSocketResult};
+use crate::{
+    error::RSocketResult,
+    frame::{codec, FrameHeader},
+};
 
 #[derive(Debug, Clone, From)]
 pub struct Resume<'a> {
@@ -19,12 +21,15 @@ pub struct Resume<'a> {
 
 impl<'a> BodyCodec<'a> for Resume<'a> {
     fn decode(
-        _header: &FrameHeader,
         input: &'a [u8],
+        _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((Version::parse, length_data(be_u16), be_u64, be_u64)))(
-            input,
-        )
+        codec::map_into(tuple((
+            Version::parse,
+            length_data(be_u16),
+            be_u64,
+            be_u64,
+        )))(input)
     }
 
     fn encode<W: std::io::Write>(

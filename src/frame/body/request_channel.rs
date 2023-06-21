@@ -1,14 +1,10 @@
 use derive_more::From;
-use nom::{
-    combinator::{into, rest, verify},
-    number::complete::be_u32,
-    sequence::tuple,
-};
+use nom::{combinator::rest, sequence::tuple};
 
-use super::{codec::BodyCodec, util::metadata_opt};
+use super::codec::BodyCodec;
 use crate::{
     error::RSocketResult,
-    frame::{Flags, FrameHeader},
+    frame::{codec, Flags, FrameHeader},
 };
 
 #[derive(Debug, Clone, From)]
@@ -20,12 +16,12 @@ pub struct RequestChannel<'a> {
 
 impl<'a> BodyCodec<'a> for RequestChannel<'a> {
     fn decode(
-        header: &FrameHeader,
         input: &'a [u8],
+        cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((
-            verify(be_u32, |&v| v > 0),
-            metadata_opt(header),
+        codec::map_into(tuple((
+            codec::non_zero_be_u32,
+            codec::length_metadata(cx),
             rest,
         )))(input)
     }

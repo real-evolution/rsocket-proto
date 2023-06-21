@@ -1,4 +1,6 @@
-use nom::{combinator::map, number::complete::be_u32};
+use nom::number::complete::be_u32;
+
+use crate::frame::codec;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Version {
@@ -31,8 +33,14 @@ impl From<Version> for u32 {
 }
 
 impl Version {
-    #[inline(always)]
-    pub(super) fn parse(input: &[u8]) -> nom::IResult<&[u8], Self> {
-        map(be_u32, |ver| ver.into())(input)
+    pub(crate) fn parse<I, E>(input: I) -> nom::IResult<I, Version, E>
+    where
+        I: nom::Slice<std::ops::RangeFrom<usize>>
+            + nom::InputIter<Item = u8>
+            + nom::InputLength
+            + nom::InputTake,
+        E: nom::error::ParseError<I>,
+    {
+        codec::map_into(be_u32)(input)
     }
 }

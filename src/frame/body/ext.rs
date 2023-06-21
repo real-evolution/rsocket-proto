@@ -1,13 +1,10 @@
 use derive_more::From;
-use nom::{combinator::into, number::complete::be_u32, sequence::tuple};
+use nom::{combinator::rest, number::complete::be_u32, sequence::tuple};
 
-use super::{
-    codec::BodyCodec,
-    util::{metadata_opt, rest_opt},
-};
+use super::codec::BodyCodec;
 use crate::{
     error::RSocketResult,
-    frame::{Flags, FrameHeader},
+    frame::{codec, Flags, FrameHeader},
 };
 
 #[derive(Debug, Clone, From)]
@@ -19,10 +16,14 @@ pub struct Ext<'a> {
 
 impl<'a> BodyCodec<'a> for Ext<'a> {
     fn decode(
-        header: &FrameHeader,
         input: &'a [u8],
+        cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((be_u32, metadata_opt(header), rest_opt)))(input)
+        codec::map_into(tuple((
+            be_u32,
+            codec::length_metadata(cx),
+            codec::none_if_empty(rest),
+        )))(input)
     }
 
     fn encode<W: std::io::Write>(

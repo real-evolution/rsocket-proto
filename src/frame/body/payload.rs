@@ -1,13 +1,13 @@
 use derive_more::From;
 use nom::{
-    combinator::{cond, into, rest},
+    combinator::{cond, rest},
     sequence::tuple,
 };
 
-use super::{codec::BodyCodec, util::metadata_opt};
+use super::codec::BodyCodec;
 use crate::{
     error::RSocketResult,
-    frame::{Flags, FrameHeader},
+    frame::{codec, Flags, FrameHeader},
 };
 
 #[derive(Debug, Clone, From)]
@@ -18,12 +18,12 @@ pub struct Payload<'a> {
 
 impl<'a> BodyCodec<'a> for Payload<'a> {
     fn decode(
-        header: &FrameHeader,
         input: &'a [u8],
+        cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((
-            metadata_opt(header),
-            cond(!header.flags.contains(Flags::COMPLETE), rest),
+        codec::map_into(tuple((
+            codec::length_metadata(cx),
+            cond(!cx.header.flags.contains(Flags::COMPLETE), rest),
         )))(input)
     }
 

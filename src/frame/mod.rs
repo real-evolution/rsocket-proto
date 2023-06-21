@@ -1,4 +1,5 @@
 mod body;
+mod codec;
 mod header;
 mod primitives;
 
@@ -43,37 +44,32 @@ impl<'a> Frame<'a> {
 
     pub fn decode(input: &'a [u8]) -> RSocketResult<Self> {
         let (rem, header) = FrameHeader::decode(input)?;
+        let cx = codec::ParseContext { header, raw: input };
         let (rem, body) = match header.frame_type {
-            | FrameType::Setup => Self::decode_body::<Setup>(&header, rem),
-            | FrameType::Lease => Self::decode_body::<Lease>(&header, rem),
-            | FrameType::Keepalive => {
-                Self::decode_body::<Keepalive>(&header, rem)
-            }
+            | FrameType::Setup => Self::decode_body::<Setup>(&cx, rem),
+            | FrameType::Lease => Self::decode_body::<Lease>(&cx, rem),
+            | FrameType::Keepalive => Self::decode_body::<Keepalive>(&cx, rem),
             | FrameType::RequestResponse => {
-                Self::decode_body::<RequestResponse>(&header, rem)
+                Self::decode_body::<RequestResponse>(&cx, rem)
             }
             | FrameType::RequestFNF => {
-                Self::decode_body::<RequestFNF>(&header, rem)
+                Self::decode_body::<RequestFNF>(&cx, rem)
             }
             | FrameType::RequestStream => {
-                Self::decode_body::<RequestStream>(&header, rem)
+                Self::decode_body::<RequestStream>(&cx, rem)
             }
             | FrameType::RequestChannel => {
-                Self::decode_body::<RequestChannel>(&header, rem)
+                Self::decode_body::<RequestChannel>(&cx, rem)
             }
-            | FrameType::RequestN => {
-                Self::decode_body::<RequestN>(&header, rem)
-            }
-            | FrameType::Cancel => Self::decode_body::<Cancel>(&header, rem),
-            | FrameType::Payload => Self::decode_body::<Payload>(&header, rem),
-            | FrameType::Error => Self::decode_body::<Error>(&header, rem),
+            | FrameType::RequestN => Self::decode_body::<RequestN>(&cx, rem),
+            | FrameType::Cancel => Self::decode_body::<Cancel>(&cx, rem),
+            | FrameType::Payload => Self::decode_body::<Payload>(&cx, rem),
+            | FrameType::Error => Self::decode_body::<Error>(&cx, rem),
             | FrameType::MetadataPush => {
-                Self::decode_body::<MetadataPush>(&header, rem)
+                Self::decode_body::<MetadataPush>(&cx, rem)
             }
-            | FrameType::Resume => Self::decode_body::<Resume>(&header, rem),
-            | FrameType::ResumeOk => {
-                Self::decode_body::<ResumeOk>(&header, rem)
-            }
+            | FrameType::Resume => Self::decode_body::<Resume>(&cx, rem),
+            | FrameType::ResumeOk => Self::decode_body::<ResumeOk>(&cx, rem),
             | FrameType::Other(t) => {
                 return Err(RSocketError::UnknownFrameType(t))
             }
@@ -94,9 +90,9 @@ impl<'a> Frame<'a> {
 
     #[inline(always)]
     fn decode_body<C: BodyCodec<'a> + Into<FrameBody<'a>>>(
-        header: &header::FrameHeader,
+        cx: &codec::ParseContext<'a>,
         input: &'a [u8],
     ) -> nom::IResult<&'a [u8], FrameBody<'a>> {
-        C::decode(header, input).map(|(rest, body)| (rest, body.into()))
+        C::decode(input, cx).map(|(rest, body)| (rest, body.into()))
     }
 }

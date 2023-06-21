@@ -1,11 +1,10 @@
 use derive_more::From;
-use nom::{
-    combinator::{map, verify},
-    number::complete::be_u32,
-};
 
 use super::codec::BodyCodec;
-use crate::{error::RSocketResult, frame::FrameHeader};
+use crate::{
+    error::RSocketResult,
+    frame::{codec, FrameHeader},
+};
 
 #[derive(Debug, Clone, From)]
 pub struct RequestN {
@@ -14,10 +13,10 @@ pub struct RequestN {
 
 impl<'a> BodyCodec<'a> for RequestN {
     fn decode(
-        _header: &FrameHeader,
         input: &'a [u8],
+        _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        map(verify(be_u32, |&v| v > 0), Into::into)(input)
+        codec::map_into(codec::non_zero_be_u32)(input)
     }
 
     fn encode<W: std::io::Write>(

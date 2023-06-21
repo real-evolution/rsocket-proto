@@ -2,15 +2,14 @@ use std::io::Write;
 
 use derive_more::From;
 use nom::{
-    combinator::{cond, map, rest, verify},
-    number::complete::be_u32,
+    combinator::{cond, rest},
     sequence::tuple,
 };
 
 use super::codec::BodyCodec;
 use crate::{
     error::RSocketResult,
-    frame::{Flags, FrameHeader},
+    frame::{codec, Flags, FrameHeader},
 };
 
 #[derive(Debug, Clone, From)]
@@ -22,17 +21,14 @@ pub struct Lease<'a> {
 
 impl<'a> BodyCodec<'a> for Lease<'a> {
     fn decode(
-        header: &FrameHeader,
         input: &'a [u8],
+        cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        map(
-            tuple((
-                verify(be_u32, |&v| v > 0),
-                verify(be_u32, |&v| v > 0),
-                cond(header.flags.contains(Flags::METADATA), rest),
-            )),
-            Into::into,
-        )(input)
+        codec::map_into(tuple((
+            codec::non_zero_be_u32,
+            codec::non_zero_be_u32,
+            cond(cx.header.flags.contains(Flags::METADATA), rest),
+        )))(input)
     }
 
     fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {

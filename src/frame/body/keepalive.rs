@@ -1,16 +1,12 @@
 use std::io::Write;
 
 use derive_more::From;
-use nom::{
-    combinator::{into, verify},
-    number::complete::be_u64,
-    sequence::tuple,
-};
+use nom::{combinator::rest, sequence::tuple};
 
-use super::{codec::BodyCodec, util::rest_opt};
+use super::codec::BodyCodec;
 use crate::{
     error::RSocketResult,
-    frame::{Flags, FrameHeader},
+    frame::{codec, Flags, FrameHeader},
 };
 
 #[derive(Debug, Clone, From)]
@@ -21,10 +17,13 @@ pub struct Keepalive<'a> {
 
 impl<'a> BodyCodec<'a> for Keepalive<'a> {
     fn decode(
-        _header: &FrameHeader,
         input: &'a [u8],
+        _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((verify(be_u64, |&v| v > 0), rest_opt)))(input)
+        codec::map_into(tuple((
+            codec::non_zero_be_u64,
+            codec::none_if_empty(rest),
+        )))(input)
     }
 
     fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {

@@ -14,7 +14,6 @@ mod request_stream;
 mod resume;
 mod resume_ok;
 mod setup;
-mod util;
 mod version;
 
 pub use cancel::Cancel;

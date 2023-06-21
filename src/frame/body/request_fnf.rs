@@ -1,13 +1,10 @@
 use derive_more::From;
-use nom::{
-    combinator::{into, rest},
-    sequence::tuple,
-};
+use nom::{combinator::rest, sequence::tuple};
 
-use super::{codec::BodyCodec, util::metadata_opt};
+use super::codec::BodyCodec;
 use crate::{
     error::RSocketResult,
-    frame::{Flags, FrameHeader},
+    frame::{codec, Flags, FrameHeader},
 };
 
 #[derive(Debug, Clone, From)]
@@ -18,10 +15,10 @@ pub struct RequestFNF<'a> {
 
 impl<'a> BodyCodec<'a> for RequestFNF<'a> {
     fn decode(
-        header: &FrameHeader,
         input: &'a [u8],
+        cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((metadata_opt(header), rest)))(input)
+        codec::map_into(tuple((codec::length_metadata(cx), rest)))(input)
     }
 
     fn encode<W: std::io::Write>(
