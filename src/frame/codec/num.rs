@@ -5,6 +5,7 @@ use nom::combinator::verify;
 macro_rules! non_zero_parser {
     ($e:ident => $t:ident) => {
         paste::paste! {
+            #[allow(unused)]
             pub(crate) fn [<non_zero_ $e _ $t>]<I, E>(
                 input: I,
             ) ->  nom::IResult<I, $t, E>
