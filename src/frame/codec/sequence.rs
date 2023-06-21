@@ -51,17 +51,6 @@ where
 }
 
 #[inline(always)]
-pub(crate) fn length_utf8<'a, L, N>(
-    len: L,
-) -> impl Parser<&'a [u8], &'a str, nom::error::Error<&'a [u8]>>
-where
-    N: nom::ToUsize,
-    L: Parser<&'a [u8], N, nom::error::Error<&'a [u8]>>,
-{
-    map_res(length_data(len), std::str::from_utf8)
-}
-
-#[inline(always)]
 pub(crate) fn rest_utf8<'a, E>(
     input: &'a [u8],
 ) -> nom::IResult<&'a [u8], &'a str, E>
