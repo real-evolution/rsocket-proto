@@ -14,7 +14,7 @@ mod request_stream;
 mod resume;
 mod resume_ok;
 mod setup;
-mod version;
+mod value_types;
 
 pub use cancel::Cancel;
 pub use error::{Error, ErrorCode};
@@ -31,7 +31,7 @@ pub use request_stream::RequestStream;
 pub use resume::Resume;
 pub use resume_ok::ResumeOk;
 pub use setup::Setup;
-pub use version::Version;
+pub use value_types::*;
 
 pub(crate) use codec::BodyCodec;
 

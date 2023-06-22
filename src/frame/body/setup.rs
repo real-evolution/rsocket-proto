@@ -7,7 +7,7 @@ use nom::number::complete::{be_u16, be_u8};
 use nom::sequence::tuple;
 
 use super::codec::BodyCodec;
-use super::version::Version;
+use super::Version;
 use crate::error::RSocketResult;
 use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
@@ -31,7 +31,7 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
     ) -> nom::IResult<&'a [u8], Self> {
         into(tuple((
             // version
-            Version::parse,
+            Version::decode,
             // keepalive
             codec::non_zero_be_u32,
             // lifetime
@@ -49,8 +49,18 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
         )))(input)
     }
 
-    fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        use byteorder::{WriteBytesExt, BE};
+
+        // version
+        self.version.encode(writer)?;
+        // keepalive
+        writer.write_u32::<BE>(self.keepalive)?;
+        // lifetime
+        writer.write_u32::<BE>(self.lifetime)?;
+        // token
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
