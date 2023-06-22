@@ -10,7 +10,9 @@ use nom::{
 use crate::frame::Flags;
 
 #[inline(always)]
-pub(crate) fn none_if_empty<I, E, F>(parser: F) -> impl Parser<I, Option<I>, E>
+pub(crate) fn none_if_empty<I, E, F>(
+    parser: F,
+) -> impl FnMut(I) -> nom::IResult<I, Option<I>, E>
 where
     F: Parser<I, I, E>,
     I: nom::InputLength,
@@ -21,7 +23,7 @@ where
 #[inline(always)]
 pub(crate) fn length_metadata<'a, I, E>(
     cx: &super::ParseContext<'_>,
-) -> impl Parser<I, Option<I>, E> + 'a
+) -> impl FnMut(I) -> nom::IResult<I, Option<I>, E>
 where
     I: nom::Slice<RangeFrom<usize>>
         + nom::InputIter<Item = u8>
@@ -39,7 +41,7 @@ where
 #[inline(always)]
 pub(crate) fn length_ascii<'a, L, N>(
     len: L,
-) -> impl Parser<&'a [u8], &'a str, nom::error::Error<&'a [u8]>>
+) -> impl FnMut(&'a [u8]) -> nom::IResult<&'a [u8], &'a str>
 where
     N: nom::ToUsize,
     L: Parser<&'a [u8], N, nom::error::Error<&'a [u8]>>,
