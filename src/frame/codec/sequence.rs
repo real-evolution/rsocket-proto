@@ -1,7 +1,7 @@
 use std::ops::RangeFrom;
 
 use nom::{
-    combinator::{cond, map, map_res, rest, verify},
+    combinator::{cond, map, map_res, rest},
     multi::length_data,
     number::complete::be_u24,
     Parser,
@@ -35,20 +35,6 @@ where
     cond(
         cx.header.flags.contains(Flags::METADATA),
         length_data(be_u24),
-    )
-}
-
-#[inline(always)]
-pub(crate) fn length_ascii<'a, L, N>(
-    len: L,
-) -> impl FnMut(&'a [u8]) -> nom::IResult<&'a [u8], &'a str>
-where
-    N: nom::ToUsize,
-    L: Parser<&'a [u8], N, nom::error::Error<&'a [u8]>>,
-{
-    map(
-        verify(length_data(len), |b: &[u8]| b.is_ascii()),
-        |b| unsafe { std::str::from_utf8_unchecked(b) },
     )
 }
 
