@@ -15,22 +15,11 @@ impl Default for Version {
     }
 }
 
-impl From<u32> for Version {
-    #[inline(always)]
-    fn from(value: u32) -> Self {
-        Self {
-            major: (value >> 16) as u16,
-            minor: (value & 0xffff) as u16,
-        }
-    }
-}
+        let (r, major) = be_u16(input)?;
 
-impl From<Version> for u32 {
-    #[inline(always)]
     fn from(value: Version) -> Self {
         ((value.major as u32) << 16) | (value.minor as u32)
     }
-}
 
 impl Version {
     pub(crate) fn parse<I, E>(input: I) -> nom::IResult<I, Version, E>
