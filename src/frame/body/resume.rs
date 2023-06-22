@@ -25,7 +25,7 @@ impl<'a> BodyCodec<'a> for Resume<'a> {
         _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
         codec::map_into(tuple((
-            Version::parse,
+            Version::decode,
             length_data(be_u16),
             be_u64,
             be_u64,
