@@ -8,16 +8,15 @@ pub struct RequestN {
     pub request_n: NonZero<u32>,
 }
 
-impl<'a> BodyCodec<'a> for RequestN {
-    fn decode(
-        input: &'a [u8],
-        _cx: &super::BodyDecodeContext,
-    ) -> nom::IResult<&'a [u8], Self> {
+impl<'a> Decodable<'a> for RequestN {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
         let (rem, request_n) = Decodable::decode(input)?;
 
         Ok((rem, Self { request_n }))
     }
+}
 
+impl<'a> BodyCodec<'a> for RequestN {
     fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.request_n.encode(writer)?;
 

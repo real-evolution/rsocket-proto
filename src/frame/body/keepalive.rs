@@ -6,6 +6,7 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, NonZero};
 use crate::error::RSocketResult;
+use crate::frame::codec::Decodable;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
@@ -14,11 +15,8 @@ pub struct Keepalive<'a> {
     pub data: Data<'a>,
 }
 
-impl<'a> BodyCodec<'a> for Keepalive<'a> {
-    fn decode(
-        input: &'a [u8],
-        _cx: &super::BodyDecodeContext,
-    ) -> nom::IResult<&'a [u8], Self> {
+impl<'a> Decodable<'a> for Keepalive<'a> {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {
                 last_received_position: m.next()?,
@@ -26,7 +24,9 @@ impl<'a> BodyCodec<'a> for Keepalive<'a> {
             })
         })(input)
     }
+}
 
+impl<'a> BodyCodec<'a> for Keepalive<'a> {
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.last_received_position.encode(writer)?;
         self.data.encode(writer)?;

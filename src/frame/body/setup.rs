@@ -4,6 +4,7 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
 use crate::error::RSocketResult;
+use crate::frame::codec::ContextDecodable;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
@@ -18,8 +19,8 @@ pub struct Setup<'a> {
     pub data: Data<'a>,
 }
 
-impl<'a> BodyCodec<'a> for Setup<'a> {
-    fn decode(
+impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Setup<'a> {
+    fn decode_with(
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
@@ -36,7 +37,9 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
             })
         })(input)
     }
+}
 
+impl<'a> BodyCodec<'a> for Setup<'a> {
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
         // version
         self.version.encode(writer)?;

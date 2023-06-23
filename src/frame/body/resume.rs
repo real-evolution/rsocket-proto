@@ -3,6 +3,7 @@ use derive_more::From;
 use super::util::chained;
 use super::{codec::BodyCodec, Number, ResumeToken, Version};
 use crate::error::RSocketResult;
+use crate::frame::codec::Decodable;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]
@@ -13,11 +14,8 @@ pub struct Resume<'a> {
     pub first_available_client_position: Number<u64>,
 }
 
-impl<'a> BodyCodec<'a> for Resume<'a> {
-    fn decode(
-        input: &'a [u8],
-        _cx: &super::BodyDecodeContext,
-    ) -> nom::IResult<&'a [u8], Self> {
+impl<'a> Decodable<'a> for Resume<'a> {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {
                 version: m.next()?,
@@ -27,7 +25,9 @@ impl<'a> BodyCodec<'a> for Resume<'a> {
             })
         })(input)
     }
+}
 
+impl<'a> BodyCodec<'a> for Resume<'a> {
     fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.version.encode(writer)?;
         self.resume_identification_token.encode(writer)?;

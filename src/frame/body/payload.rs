@@ -3,6 +3,7 @@ use derive_more::From;
 use super::util::chained;
 use super::{codec::BodyCodec, Data, PrefixedMetadata};
 use crate::error::RSocketResult;
+use crate::frame::codec::ContextDecodable;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
@@ -11,8 +12,8 @@ pub struct Payload<'a> {
     pub data: Option<Data<'a>>,
 }
 
-impl<'a> BodyCodec<'a> for Payload<'a> {
-    fn decode(
+impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Payload<'a> {
+    fn decode_with(
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
@@ -23,7 +24,9 @@ impl<'a> BodyCodec<'a> for Payload<'a> {
             })
         })(input)
     }
+}
 
+impl<'a> BodyCodec<'a> for Payload<'a> {
     fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         if let Some(metadata) = &self.metadata {
             metadata.encode(writer)?;

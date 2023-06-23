@@ -10,16 +10,15 @@ pub struct MetadataPush<'a> {
     pub metadata: RestMetadata<'a>,
 }
 
-impl<'a> BodyCodec<'a> for MetadataPush<'a> {
-    fn decode(
-        input: &'a [u8],
-        _cx: &super::BodyDecodeContext,
-    ) -> nom::IResult<&'a [u8], Self> {
+impl<'a> Decodable<'a> for MetadataPush<'a> {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
         let (rem, metadata) = Decodable::decode(input)?;
 
         Ok((rem, Self { metadata }))
     }
+}
 
+impl<'a> BodyCodec<'a> for MetadataPush<'a> {
     fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.metadata.encode(writer)?;
 

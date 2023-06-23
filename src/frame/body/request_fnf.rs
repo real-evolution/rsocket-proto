@@ -2,6 +2,7 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, PrefixedMetadata};
 use crate::error::RSocketResult;
+use crate::frame::codec::ContextDecodable;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
@@ -10,8 +11,8 @@ pub struct RequestFNF<'a> {
     pub data: Data<'a>,
 }
 
-impl<'a> BodyCodec<'a> for RequestFNF<'a> {
-    fn decode(
+impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for RequestFNF<'a> {
+    fn decode_with(
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
@@ -22,7 +23,9 @@ impl<'a> BodyCodec<'a> for RequestFNF<'a> {
             })
         })(input)
     }
+}
 
+impl<'a> BodyCodec<'a> for RequestFNF<'a> {
     fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         if let Some(metadata) = &self.metadata {
             metadata.encode(writer)?;

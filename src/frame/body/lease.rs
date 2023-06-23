@@ -3,6 +3,7 @@ use std::io::Write;
 use super::util::chained;
 use super::{codec::BodyCodec, NonZero, RestMetadata};
 use crate::error::RSocketResult;
+use crate::frame::codec::ContextDecodable;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
@@ -12,8 +13,8 @@ pub struct Lease<'a> {
     pub metadata: Option<RestMetadata<'a>>,
 }
 
-impl<'a> BodyCodec<'a> for Lease<'a> {
-    fn decode(
+impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Lease<'a> {
+    fn decode_with(
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
@@ -25,7 +26,9 @@ impl<'a> BodyCodec<'a> for Lease<'a> {
             })
         })(input)
     }
+}
 
+impl<'a> BodyCodec<'a> for Lease<'a> {
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.ttl.encode(writer)?;
         self.number_of_requests.encode(writer)?;

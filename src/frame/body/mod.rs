@@ -61,3 +61,39 @@ pub enum FrameBody<'a> {
 pub(crate) struct BodyDecodeContext {
     pub(crate) header: FrameHeader,
 }
+
+impl<'a> ContextDecodable<'a, &BodyDecodeContext> for FrameBody<'a> {
+    fn decode_with(
+        input: &'a [u8],
+        cx: &BodyDecodeContext,
+    ) -> nom::IResult<&'a [u8], Self> {
+        util::chained(move |m| {
+            Ok(match cx.header.frame_type {
+                | FrameType::Setup => m.next_with::<Setup, _>(cx)?.into(),
+                | FrameType::Lease => m.next_with::<Lease, _>(cx)?.into(),
+                | FrameType::Keepalive => m.next::<Keepalive>()?.into(),
+
+                | FrameType::RequestResponse => {
+                    m.next_with::<RequestResponse, _>(cx)?.into()
+                }
+                | FrameType::RequestFNF => {
+                    m.next_with::<RequestFNF, _>(cx)?.into()
+                }
+                | FrameType::RequestStream => {
+                    m.next_with::<RequestStream, _>(cx)?.into()
+                }
+                | FrameType::RequestChannel => {
+                    m.next_with::<RequestChannel, _>(cx)?.into()
+                }
+                | FrameType::RequestN => m.next::<RequestN>()?.into(),
+                | FrameType::Cancel => m.next::<Cancel>()?.into(),
+                | FrameType::Payload => m.next_with::<Payload, _>(cx)?.into(),
+                | FrameType::Error => m.next::<Error>()?.into(),
+                | FrameType::MetadataPush => m.next::<MetadataPush>()?.into(),
+                | FrameType::Resume => m.next::<Resume>()?.into(),
+                | FrameType::ResumeOk => m.next::<ResumeOk>()?.into(),
+                | FrameType::Other(_) => todo!(),
+            })
+        })(input)
+    }
+}
