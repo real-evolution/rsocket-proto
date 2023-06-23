@@ -1,6 +1,5 @@
 mod flags;
 mod types;
-mod validator;
 
 pub use flags::Flags;
 pub use types::FrameType;
@@ -9,8 +8,6 @@ use nom::combinator::map;
 use nom::number::complete::{be_u16, be_u32};
 use nom::sequence::tuple;
 use nom::IResult;
-
-use self::validator::FrameHeaderValidator;
 
 #[derive(Debug, Clone, Copy)]
 pub struct FrameHeader {
@@ -27,10 +24,5 @@ impl FrameHeader {
             frame_type: ((rem >> 10) as u8).into(),
             flags: (rem % 0x03FFu16).into(),
         })(input)
-    }
-
-    #[inline(always)]
-    pub(crate) fn validate(&self) -> FrameHeaderValidator<'_> {
-        FrameHeaderValidator::new(self)
     }
 }
