@@ -1,7 +1,7 @@
 use super::codec::BodyCodec;
+use super::util::chained;
 use super::{Data, NonZero, PrefixedMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec::chained;
 use crate::frame::{codec, Flags, FrameHeader};
 
 #[derive(Debug, Clone)]

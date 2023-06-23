@@ -3,9 +3,10 @@ use std::io::Write;
 use derive_more::From;
 
 use super::codec::BodyCodec;
+use super::util::chained;
 use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
 use crate::error::RSocketResult;
-use crate::frame::codec::{self, chained};
+use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]

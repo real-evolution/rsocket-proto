@@ -3,9 +3,9 @@ use std::io::Write;
 use derive_more::From;
 
 use super::codec::BodyCodec;
+use super::util::chained;
 use super::{Data, NonZero};
 use crate::error::RSocketResult;
-use crate::frame::codec::chained;
 use crate::frame::{codec, Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]

@@ -1,8 +1,9 @@
 use derive_more::From;
 
+use super::util::chained;
 use super::{codec::BodyCodec, Data, Number, PrefixedMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec::{self, chained};
+use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]

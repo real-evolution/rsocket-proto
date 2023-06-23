@@ -1,13 +1,9 @@
 use derive_more::From;
 
+use super::util::chained;
 use super::{codec::BodyCodec, Number, ResumeToken, Version};
-use crate::{
-    error::RSocketResult,
-    frame::{
-        codec::{self, chained},
-        FrameHeader,
-    },
-};
+use crate::error::RSocketResult;
+use crate::frame::{codec, FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct Resume<'a> {

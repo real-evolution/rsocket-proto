@@ -7,7 +7,7 @@ impl<'a> Chained<'a> {
     #[inline(always)]
     pub(crate) fn next<D>(&mut self) -> Result<D, NomErr<&'a [u8]>>
     where
-        D: super::Decodable<'a>,
+        D: crate::frame::codec::Decodable<'a>,
     {
         let out;
 
@@ -22,7 +22,7 @@ impl<'a> Chained<'a> {
         cx: C,
     ) -> Result<D, NomErr<&'a [u8]>>
     where
-        D: super::ContextDecodable<'a, C>,
+        D: crate::frame::codec::ContextDecodable<'a, C>,
     {
         let out;
 

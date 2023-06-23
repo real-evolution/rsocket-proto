@@ -1,12 +1,11 @@
 use std::io::Write;
 
-use derive_more::From;
-
+use super::util::chained;
 use super::{codec::BodyCodec, NonZero, RestMetadata};
+use crate::error::RSocketResult;
 use crate::frame::{codec, Flags, FrameHeader};
-use crate::{error::RSocketResult, frame::codec::chained};
 
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct Lease<'a> {
     pub ttl: NonZero<u32>,
     pub number_of_requests: NonZero<u32>,

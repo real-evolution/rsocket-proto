@@ -1,8 +1,9 @@
 use std::io::Write;
 
+use super::util::chained;
 use super::{codec::BodyCodec, ErrorCode, Utf8Text};
 use crate::error::RSocketResult;
-use crate::frame::codec::{self, chained};
+use crate::frame::codec;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
