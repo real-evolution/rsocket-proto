@@ -1,22 +1,16 @@
 use std::io::Write;
 
 use derive_more::From;
-use nom::{
-    combinator::{cond, rest},
-    sequence::tuple,
-};
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, Flags, FrameHeader},
-};
+use super::{codec::BodyCodec, NonZero, RestMetadata};
+use crate::frame::{codec, Flags, FrameHeader};
+use crate::{error::RSocketResult, frame::codec::chained};
 
 #[derive(Debug, Clone, From)]
 pub struct Lease<'a> {
-    pub ttl: u32,
-    pub number_of_requests: u32,
-    pub metadata: Option<&'a [u8]>,
+    pub ttl: NonZero<u32>,
+    pub number_of_requests: NonZero<u32>,
+    pub metadata: Option<RestMetadata<'a>>,
 }
 
 impl<'a> BodyCodec<'a> for Lease<'a> {
@@ -24,11 +18,13 @@ impl<'a> BodyCodec<'a> for Lease<'a> {
         input: &'a [u8],
         cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(tuple((
-            codec::non_zero_be_u32,
-            codec::non_zero_be_u32,
-            cond(cx.header.flags.contains(Flags::METADATA), rest),
-        )))(input)
+        chained(move |m| {
+            Ok(Self {
+                ttl: m.next()?,
+                number_of_requests: m.next()?,
+                metadata: m.next_with(cx)?,
+            })
+        })(input)
     }
 
     fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {

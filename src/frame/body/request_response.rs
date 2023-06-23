@@ -1,16 +1,12 @@
-use derive_more::From;
-use nom::{combinator::rest, sequence::tuple};
+use super::{codec::BodyCodec, Data, PrefixedMetadata};
+use crate::error::RSocketResult;
+use crate::frame::codec::{self, chained};
+use crate::frame::{Flags, FrameHeader};
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, Flags, FrameHeader},
-};
-
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct RequestResponse<'a> {
-    pub metadata: Option<&'a [u8]>,
-    pub data: &'a [u8],
+    pub metadata: Option<PrefixedMetadata<'a>>,
+    pub data: Data<'a>,
 }
 
 impl<'a> BodyCodec<'a> for RequestResponse<'a> {
@@ -18,7 +14,12 @@ impl<'a> BodyCodec<'a> for RequestResponse<'a> {
         input: &'a [u8],
         cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(tuple((codec::length_metadata(cx), rest)))(input)
+        chained(move |m| {
+            Ok(Self {
+                metadata: m.next_with(cx)?,
+                data: m.next()?,
+            })
+        })(input)
     }
 
     fn encode<W: std::io::Write>(

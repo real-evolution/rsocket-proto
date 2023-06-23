@@ -1,15 +1,13 @@
 use derive_more::From;
-use nom::number::complete::be_u64;
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, FrameHeader},
-};
+use super::{codec::BodyCodec, Number};
+use crate::error::RSocketResult;
+use crate::frame::codec::{self, Decodable};
+use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]
 pub struct ResumeOk {
-    pub last_received_client_position: u64,
+    pub last_received_client_position: Number<u64>,
 }
 
 impl<'a> BodyCodec<'a> for ResumeOk {
@@ -17,7 +15,14 @@ impl<'a> BodyCodec<'a> for ResumeOk {
         input: &'a [u8],
         _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(be_u64)(input)
+        let (rem, last_received_client_position) = Number::decode(input)?;
+
+        Ok((
+            rem,
+            Self {
+                last_received_client_position,
+            },
+        ))
     }
 
     fn encode<W: std::io::Write>(

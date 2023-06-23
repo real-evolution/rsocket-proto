@@ -1,15 +1,13 @@
 use derive_more::From;
-use nom::combinator::rest;
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, Flags, FrameHeader},
-};
+use super::{codec::BodyCodec, RestMetadata};
+use crate::error::RSocketResult;
+use crate::frame::codec::{self, Decodable};
+use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct MetadataPush<'a> {
-    pub metadata: &'a [u8],
+    pub metadata: RestMetadata<'a>,
 }
 
 impl<'a> BodyCodec<'a> for MetadataPush<'a> {
@@ -17,7 +15,9 @@ impl<'a> BodyCodec<'a> for MetadataPush<'a> {
         input: &'a [u8],
         _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(rest)(input)
+        let (rem, metadata) = Decodable::decode(input)?;
+
+        Ok((rem, Self { metadata }))
     }
 
     fn encode<W: std::io::Write>(

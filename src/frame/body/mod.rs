@@ -17,7 +17,7 @@ mod setup;
 mod value_types;
 
 pub use cancel::Cancel;
-pub use error::{Error, ErrorCode};
+pub use error::Error;
 pub use ext::Ext;
 pub use keepalive::Keepalive;
 pub use lease::Lease;

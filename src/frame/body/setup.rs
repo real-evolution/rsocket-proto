@@ -1,27 +1,23 @@
 use std::io::Write;
 
 use derive_more::From;
-use nom::combinator::{cond, into, rest};
-use nom::multi::length_data;
-use nom::number::complete::{be_u16, be_u8};
-use nom::sequence::tuple;
 
 use super::codec::BodyCodec;
-use super::Version;
+use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
 use crate::error::RSocketResult;
-use crate::frame::codec;
+use crate::frame::codec::{self, chained};
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct Setup<'a> {
     pub version: Version,
-    pub keepalive: u32,
-    pub lifetime: u32,
-    pub token: Option<&'a [u8]>,
-    pub mime_metadata: &'a str,
-    pub mime_data: &'a str,
-    pub metadata: Option<&'a [u8]>,
-    pub data: Option<&'a [u8]>,
+    pub keepalive: NonZero<u32>,
+    pub lifetime: NonZero<u32>,
+    pub token: Option<ResumeToken<'a>>,
+    pub mime_metadata: MimeType<'a>,
+    pub mime_data: MimeType<'a>,
+    pub metadata: Option<PrefixedMetadata<'a>>,
+    pub data: Data<'a>,
 }
 
 impl<'a> BodyCodec<'a> for Setup<'a> {
@@ -29,24 +25,18 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
         input: &'a [u8],
         cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        into(tuple((
-            // version
-            Version::decode,
-            // keepalive
-            codec::non_zero_be_u32,
-            // lifetime
-            codec::non_zero_be_u32,
-            // token
-            cond(cx.header.flags.contains(Flags::RESUME), length_data(be_u16)),
-            // mime_metadata
-            codec::length_ascii(be_u8),
-            // mime_data
-            codec::length_ascii(be_u8),
-            // metadata
-            codec::length_metadata(cx),
-            // data
-            codec::none_if_empty(rest),
-        )))(input)
+        chained(move |m| {
+            Ok(Self {
+                version: m.next()?,
+                keepalive: m.next()?,
+                lifetime: m.next()?,
+                token: m.next_with(cx)?,
+                mime_metadata: m.next()?,
+                mime_data: m.next()?,
+                metadata: m.next_with(cx)?,
+                data: m.next()?,
+            })
+        })(input)
     }
 
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {

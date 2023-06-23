@@ -1,9 +1,7 @@
 use std::io::Write;
 
-use crate::{
-    error::RSocketResult,
-    frame::{codec::ParseContext, FrameHeader},
-};
+use crate::error::RSocketResult;
+use crate::frame::{codec::ParseContext, FrameHeader};
 
 pub(crate) trait BodyCodec<'a>: Sized {
     fn decode(

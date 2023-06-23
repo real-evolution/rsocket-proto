@@ -1,14 +1,11 @@
-use derive_more::From;
+use super::{codec::BodyCodec, NonZero};
+use crate::error::RSocketResult;
+use crate::frame::codec::{self, Decodable};
+use crate::frame::FrameHeader;
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, FrameHeader},
-};
-
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct RequestN {
-    pub request_n: u32,
+    pub request_n: NonZero<u32>,
 }
 
 impl<'a> BodyCodec<'a> for RequestN {
@@ -16,7 +13,9 @@ impl<'a> BodyCodec<'a> for RequestN {
         input: &'a [u8],
         _cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(codec::non_zero_be_u32)(input)
+        let (rem, request_n) = Decodable::decode(input)?;
+
+        Ok((rem, Self { request_n }))
     }
 
     fn encode<W: std::io::Write>(

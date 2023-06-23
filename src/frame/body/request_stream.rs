@@ -1,17 +1,13 @@
-use derive_more::From;
-use nom::{combinator::rest, sequence::tuple};
+use super::{codec::BodyCodec, Data, NonZero, PrefixedMetadata};
+use crate::error::RSocketResult;
+use crate::frame::codec::{self, chained};
+use crate::frame::{Flags, FrameHeader};
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, Flags, FrameHeader},
-};
-
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct RequestStream<'a> {
-    pub initial_request_n: u32,
-    pub metadata: Option<&'a [u8]>,
-    pub data: &'a [u8],
+    pub initial_request_n: NonZero<u32>,
+    pub metadata: Option<PrefixedMetadata<'a>>,
+    pub data: Data<'a>,
 }
 
 impl<'a> BodyCodec<'a> for RequestStream<'a> {
@@ -19,11 +15,13 @@ impl<'a> BodyCodec<'a> for RequestStream<'a> {
         input: &'a [u8],
         cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(tuple((
-            codec::non_zero_be_u32,
-            codec::length_metadata(cx),
-            rest,
-        )))(input)
+        chained(move |m| {
+            Ok(Self {
+                initial_request_n: m.next()?,
+                metadata: m.next_with(cx)?,
+                data: m.next()?,
+            })
+        })(input)
     }
 
     fn encode<W: std::io::Write>(

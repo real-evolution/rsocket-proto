@@ -1,19 +1,14 @@
 use derive_more::From;
-use nom::{
-    combinator::{cond, rest},
-    sequence::tuple,
-};
 
-use super::codec::BodyCodec;
-use crate::{
-    error::RSocketResult,
-    frame::{codec, Flags, FrameHeader},
-};
+use super::{codec::BodyCodec, Data, PrefixedMetadata};
+use crate::error::RSocketResult;
+use crate::frame::codec::{self, chained};
+use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct Payload<'a> {
-    pub metadata: Option<&'a [u8]>,
-    pub data: Option<&'a [u8]>,
+    pub metadata: Option<PrefixedMetadata<'a>>,
+    pub data: Option<Data<'a>>,
 }
 
 impl<'a> BodyCodec<'a> for Payload<'a> {
@@ -21,10 +16,12 @@ impl<'a> BodyCodec<'a> for Payload<'a> {
         input: &'a [u8],
         cx: &codec::ParseContext<'a>,
     ) -> nom::IResult<&'a [u8], Self> {
-        codec::map_into(tuple((
-            codec::length_metadata(cx),
-            cond(!cx.header.flags.contains(Flags::COMPLETE), rest),
-        )))(input)
+        chained(move |m| {
+            Ok(Self {
+                metadata: m.next_with(cx)?,
+                data: m.next_with(cx)?,
+            })
+        })(input)
     }
 
     fn encode<W: std::io::Write>(
