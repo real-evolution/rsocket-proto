@@ -1,5 +1,4 @@
 mod cancel;
-mod codec;
 mod error;
 mod ext;
 mod keepalive;
