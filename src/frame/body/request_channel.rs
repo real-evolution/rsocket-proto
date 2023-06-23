@@ -27,9 +27,17 @@ impl<'a> BodyCodec<'a> for RequestChannel<'a> {
 
     fn encode<W: std::io::Write>(
         &self,
-        _writer: &mut W,
+        writer: &mut W,
     ) -> std::io::Result<()> {
-        todo!()
+        self.initial_request_n.encode(writer)?;
+
+        if let Some(metadata) = &self.metadata {
+            metadata.encode(writer)?;
+        }
+
+        self.data.encode(writer)?;
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

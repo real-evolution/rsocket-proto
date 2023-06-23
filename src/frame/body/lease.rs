@@ -27,8 +27,14 @@ impl<'a> BodyCodec<'a> for Lease<'a> {
         })(input)
     }
 
-    fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        self.ttl.encode(writer)?;
+        self.number_of_requests.encode(writer)?;
+        if let Some(metadata) = &self.metadata {
+            metadata.encode(writer)?;
+        }
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

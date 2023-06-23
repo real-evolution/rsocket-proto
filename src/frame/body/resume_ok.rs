@@ -25,11 +25,10 @@ impl<'a> BodyCodec<'a> for ResumeOk {
         ))
     }
 
-    fn encode<W: std::io::Write>(
-        &self,
-        _writer: &mut W,
-    ) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        self.last_received_client_position.encode(writer)?;
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

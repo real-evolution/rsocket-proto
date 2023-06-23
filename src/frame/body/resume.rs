@@ -32,11 +32,13 @@ impl<'a> BodyCodec<'a> for Resume<'a> {
         })(input)
     }
 
-    fn encode<W: std::io::Write>(
-        &self,
-        _writer: &mut W,
-    ) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        self.version.encode(writer)?;
+        self.resume_identification_token.encode(writer)?;
+        self.last_received_server_position.encode(writer)?;
+        self.first_available_client_position.encode(writer)?;
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

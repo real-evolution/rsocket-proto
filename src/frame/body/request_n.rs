@@ -20,9 +20,11 @@ impl<'a> BodyCodec<'a> for RequestN {
 
     fn encode<W: std::io::Write>(
         &self,
-        _writer: &mut W,
+        writer: &mut W,
     ) -> std::io::Result<()> {
-        todo!()
+        self.request_n.encode(writer)?;
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

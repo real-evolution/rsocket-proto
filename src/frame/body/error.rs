@@ -24,8 +24,11 @@ impl<'a> BodyCodec<'a> for Error<'a> {
         })(input)
     }
 
-    fn encode<W: Write>(&self, _writer: &mut W) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        self.code.encode(writer)?;
+        self.data.encode(writer)?;
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

@@ -40,15 +40,26 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
     }
 
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
-        use byteorder::{WriteBytesExt, BE};
-
         // version
         self.version.encode(writer)?;
         // keepalive
-        writer.write_u32::<BE>(self.keepalive)?;
+        self.keepalive.encode(writer)?;
         // lifetime
-        writer.write_u32::<BE>(self.lifetime)?;
-        // token
+        self.lifetime.encode(writer)?;
+        // token (if present)
+        if let Some(token) = &self.token {
+            token.encode(writer)?;
+        }
+        // mime metadata
+        self.mime_metadata.encode(writer)?;
+        // mime data
+        self.mime_data.encode(writer)?;
+        // metadata (if present)
+        if let Some(metadata) = &self.metadata {
+            metadata.encode(writer)?;
+        }
+        // data
+        self.data.encode(writer)?;
 
         Ok(())
     }

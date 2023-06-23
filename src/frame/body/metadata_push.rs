@@ -20,11 +20,10 @@ impl<'a> BodyCodec<'a> for MetadataPush<'a> {
         Ok((rem, Self { metadata }))
     }
 
-    fn encode<W: std::io::Write>(
-        &self,
-        _writer: &mut W,
-    ) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        self.metadata.encode(writer)?;
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {

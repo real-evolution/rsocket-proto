@@ -24,11 +24,16 @@ impl<'a> BodyCodec<'a> for Payload<'a> {
         })(input)
     }
 
-    fn encode<W: std::io::Write>(
-        &self,
-        _writer: &mut W,
-    ) -> std::io::Result<()> {
-        todo!()
+    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+        if let Some(metadata) = &self.metadata {
+            metadata.encode(writer)?;
+        }
+
+        if let Some(data) = &self.data {
+            data.encode(writer)?;
+        }
+
+        Ok(())
     }
 
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
