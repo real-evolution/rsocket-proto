@@ -1,7 +1,6 @@
 use super::util::chained;
 use super::{codec::BodyCodec, Data, NonZero, PrefixedMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
@@ -14,7 +13,7 @@ pub struct RequestStream<'a> {
 impl<'a> BodyCodec<'a> for RequestStream<'a> {
     fn decode(
         input: &'a [u8],
-        cx: &codec::ParseContext<'a>,
+        cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

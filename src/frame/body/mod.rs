@@ -1,4 +1,3 @@
-mod util;
 mod cancel;
 mod codec;
 mod error;
@@ -15,6 +14,7 @@ mod request_stream;
 mod resume;
 mod resume_ok;
 mod setup;
+mod util;
 mod value_types;
 
 pub use cancel::Cancel;
@@ -38,6 +38,8 @@ pub(crate) use codec::BodyCodec;
 
 use derive_more::From;
 
+use super::FrameHeader;
+
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {
     Setup(Setup<'a>),
@@ -55,4 +57,9 @@ pub enum FrameBody<'a> {
     Ext(Ext<'a>),
     Resume(Resume<'a>),
     ResumeOk(ResumeOk),
+}
+
+#[derive(Debug)]
+pub(crate) struct ParseContext {
+    pub(crate) header: FrameHeader,
 }

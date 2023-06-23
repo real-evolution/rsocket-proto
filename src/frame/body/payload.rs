@@ -3,7 +3,6 @@ use derive_more::From;
 use super::util::chained;
 use super::{codec::BodyCodec, Data, PrefixedMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
@@ -15,7 +14,7 @@ pub struct Payload<'a> {
 impl<'a> BodyCodec<'a> for Payload<'a> {
     fn decode(
         input: &'a [u8],
-        cx: &codec::ParseContext<'a>,
+        cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

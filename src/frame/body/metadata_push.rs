@@ -2,7 +2,7 @@ use derive_more::From;
 
 use super::{codec::BodyCodec, RestMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec::{self, Decodable};
+use crate::frame::codec::Decodable;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
@@ -13,7 +13,7 @@ pub struct MetadataPush<'a> {
 impl<'a> BodyCodec<'a> for MetadataPush<'a> {
     fn decode(
         input: &'a [u8],
-        _cx: &codec::ParseContext<'a>,
+        _cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let (rem, metadata) = Decodable::decode(input)?;
 

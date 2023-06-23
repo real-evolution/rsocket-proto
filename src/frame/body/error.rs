@@ -3,7 +3,6 @@ use std::io::Write;
 use super::util::chained;
 use super::{codec::BodyCodec, ErrorCode, Utf8Text};
 use crate::error::RSocketResult;
-use crate::frame::codec;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
@@ -15,7 +14,7 @@ pub struct Error<'a> {
 impl<'a> BodyCodec<'a> for Error<'a> {
     fn decode(
         input: &'a [u8],
-        _cx: &codec::ParseContext<'a>,
+        _cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

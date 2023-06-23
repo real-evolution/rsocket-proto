@@ -1,6 +1,6 @@
 use super::{codec::BodyCodec, NonZero};
 use crate::error::RSocketResult;
-use crate::frame::codec::{self, Decodable};
+use crate::frame::codec::Decodable;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
@@ -11,17 +11,14 @@ pub struct RequestN {
 impl<'a> BodyCodec<'a> for RequestN {
     fn decode(
         input: &'a [u8],
-        _cx: &codec::ParseContext<'a>,
+        _cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let (rem, request_n) = Decodable::decode(input)?;
 
         Ok((rem, Self { request_n }))
     }
 
-    fn encode<W: std::io::Write>(
-        &self,
-        writer: &mut W,
-    ) -> std::io::Result<()> {
+    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.request_n.encode(writer)?;
 
         Ok(())

@@ -2,7 +2,7 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, NonZero, PrefixedMetadata};
 use crate::error::RSocketResult;
-use crate::frame::{codec, Flags, FrameHeader};
+use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
 pub struct RequestChannel<'a> {
@@ -14,7 +14,7 @@ pub struct RequestChannel<'a> {
 impl<'a> BodyCodec<'a> for RequestChannel<'a> {
     fn decode(
         input: &'a [u8],
-        cx: &codec::ParseContext<'a>,
+        cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {
@@ -25,10 +25,7 @@ impl<'a> BodyCodec<'a> for RequestChannel<'a> {
         })(input)
     }
 
-    fn encode<W: std::io::Write>(
-        &self,
-        writer: &mut W,
-    ) -> std::io::Result<()> {
+    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.initial_request_n.encode(writer)?;
 
         if let Some(metadata) = &self.metadata {

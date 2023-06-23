@@ -2,7 +2,7 @@ use derive_more::From;
 
 use super::{codec::BodyCodec, Number};
 use crate::error::RSocketResult;
-use crate::frame::codec::{self, Decodable};
+use crate::frame::codec::Decodable;
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]
@@ -13,7 +13,7 @@ pub struct ResumeOk {
 impl<'a> BodyCodec<'a> for ResumeOk {
     fn decode(
         input: &'a [u8],
-        _cx: &codec::ParseContext<'a>,
+        _cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let (rem, last_received_client_position) = Number::decode(input)?;
 

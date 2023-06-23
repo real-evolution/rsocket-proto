@@ -2,7 +2,6 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, PrefixedMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
@@ -14,7 +13,7 @@ pub struct RequestFNF<'a> {
 impl<'a> BodyCodec<'a> for RequestFNF<'a> {
     fn decode(
         input: &'a [u8],
-        cx: &codec::ParseContext<'a>,
+        cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

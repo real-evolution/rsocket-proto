@@ -3,7 +3,7 @@ use derive_more::From;
 use super::util::chained;
 use super::{codec::BodyCodec, Number, ResumeToken, Version};
 use crate::error::RSocketResult;
-use crate::frame::{codec, FrameHeader};
+use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]
 pub struct Resume<'a> {
@@ -16,7 +16,7 @@ pub struct Resume<'a> {
 impl<'a> BodyCodec<'a> for Resume<'a> {
     fn decode(
         input: &'a [u8],
-        _cx: &codec::ParseContext<'a>,
+        _cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

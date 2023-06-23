@@ -44,7 +44,7 @@ impl<'a> Frame<'a> {
 
     pub fn decode(input: &'a [u8]) -> RSocketResult<Self> {
         let (rem, header) = FrameHeader::decode(input)?;
-        let cx = codec::ParseContext { header, raw: input };
+        let cx = ParseContext { header };
         let (rem, body) = match header.frame_type {
             | FrameType::Setup => Self::decode_body::<Setup>(&cx, rem),
             | FrameType::Lease => Self::decode_body::<Lease>(&cx, rem),

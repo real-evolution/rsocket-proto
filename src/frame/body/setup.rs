@@ -1,15 +1,12 @@
 use std::io::Write;
 
-use derive_more::From;
-
 use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
 use crate::error::RSocketResult;
-use crate::frame::codec;
 use crate::frame::{Flags, FrameHeader};
 
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct Setup<'a> {
     pub version: Version,
     pub keepalive: NonZero<u32>,
@@ -24,7 +21,7 @@ pub struct Setup<'a> {
 impl<'a> BodyCodec<'a> for Setup<'a> {
     fn decode(
         input: &'a [u8],
-        cx: &codec::ParseContext<'a>,
+        cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

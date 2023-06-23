@@ -6,7 +6,7 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, NonZero};
 use crate::error::RSocketResult;
-use crate::frame::{codec, Flags, FrameHeader};
+use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
 pub struct Keepalive<'a> {
@@ -17,7 +17,7 @@ pub struct Keepalive<'a> {
 impl<'a> BodyCodec<'a> for Keepalive<'a> {
     fn decode(
         input: &'a [u8],
-        _cx: &codec::ParseContext<'a>,
+        _cx: &super::ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

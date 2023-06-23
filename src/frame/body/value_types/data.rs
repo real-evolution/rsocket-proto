@@ -1,9 +1,7 @@
 use derive_more::Deref;
 
-use crate::frame::{
-    codec::{ContextDecodable, Decodable, ParseContext},
-    Flags,
-};
+use crate::frame::codec::{ContextDecodable, Decodable};
+use crate::frame::{Flags, ParseContext};
 
 #[derive(Debug, Clone, Deref)]
 #[repr(transparent)]
@@ -28,10 +26,10 @@ impl<'a> Decodable<'a> for Data<'a> {
     }
 }
 
-impl<'a> ContextDecodable<'a, &ParseContext<'a>> for Option<Data<'a>> {
+impl<'a> ContextDecodable<'a, &ParseContext> for Option<Data<'a>> {
     fn decode_with(
         input: &'a [u8],
-        cx: &ParseContext<'a>,
+        cx: &ParseContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let flags = cx.header.flags;
 
