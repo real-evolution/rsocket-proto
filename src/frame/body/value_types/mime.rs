@@ -20,7 +20,7 @@ impl<'a> Decodable<'a> for MimeType<'a> {
 }
 
 impl Encodable for MimeType<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
@@ -31,6 +31,6 @@ impl Encodable for MimeType<'_> {
         writer.write_u8(buf.len() as u8)?;
         writer.write_all(buf)?;
 
-        Ok(())
+        Ok(writer)
     }
 }

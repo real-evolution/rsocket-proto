@@ -1,7 +1,7 @@
 use derive_more::Deref;
 
-use crate::frame::codec::{ContextDecodable, Decodable};
-use crate::frame::{Flags, BodyDecodeContext};
+use crate::frame::codec::{ContextDecodable, Decodable, Encodable};
+use crate::frame::{BodyDecodeContext, Flags};
 
 pub type PrefixedMetadata<'a> = Metadata<'a, true>;
 pub type RestMetadata<'a> = Metadata<'a, false>;
@@ -45,11 +45,11 @@ impl<'a, const HAS_LEN: bool> ContextDecodable<'a, &BodyDecodeContext>
     }
 }
 
-impl<'a, const HAS_LEN: bool> Metadata<'a, HAS_LEN> {
-    pub(crate) fn encode<'b, W: std::io::Write>(
-        &self,
-        writer: &'b mut W,
-    ) -> std::io::Result<&'b mut W> {
+impl<const HAS_LEN: bool> Encodable for Metadata<'_, HAS_LEN> {
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
+    where
+        W: std::io::Write,
+    {
         use byteorder::{WriteBytesExt, BE};
 
         if HAS_LEN {

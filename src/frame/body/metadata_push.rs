@@ -1,3 +1,4 @@
+use super::util::ChainedEncoder;
 use super::{codec::BodyCodec, RestMetadata};
 use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
@@ -17,13 +18,11 @@ impl<'a> Decodable<'a> for MetadataPush<'a> {
 }
 
 impl Encodable for MetadataPush<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        self.metadata.encode(writer)?;
-
-        Ok(())
+        writer.encode(&self.metadata)
     }
 }
 

@@ -16,13 +16,13 @@ impl<'a> Decodable<'a> for Data<'a> {
 }
 
 impl Encodable for Data<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
         writer.write_all(self.0)?;
 
-        Ok(())
+        Ok(writer)
     }
 }
 

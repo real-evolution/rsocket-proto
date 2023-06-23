@@ -36,10 +36,7 @@ pub use value_types::*;
 
 use derive_more::From;
 
-use super::{
-    codec::{ContextDecodable, Encodable},
-    FrameHeader, FrameType,
-};
+use super::{codec::ContextDecodable, FrameHeader, FrameType};
 
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {
@@ -70,7 +67,7 @@ impl<'a> ContextDecodable<'a, &BodyDecodeContext> for FrameBody<'a> {
         input: &'a [u8],
         cx: &BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        util::chained(move |m| {
+        util::decode_chained(move |m| {
             Ok(match cx.header.frame_type {
                 | FrameType::Setup => m.next_with::<Setup, _>(cx)?.into(),
                 | FrameType::Lease => m.next_with::<Lease, _>(cx)?.into(),

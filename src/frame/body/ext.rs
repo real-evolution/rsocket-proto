@@ -1,6 +1,6 @@
 use derive_more::From;
 
-use super::util::chained;
+use super::util::{decode_chained, ChainedEncoder};
 use super::{codec::BodyCodec, Data, Number, PrefixedMetadata};
 use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
@@ -18,7 +18,7 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Ext<'a> {
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        chained(move |m| {
+        decode_chained(move |m| {
             Ok(Self {
                 extended_type: m.next()?,
                 metadata: m.next_with(cx)?,
@@ -29,17 +29,14 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Ext<'a> {
 }
 
 impl Encodable for Ext<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        self.extended_type.encode(writer)?;
-        if let Some(metadata) = &self.metadata {
-            metadata.encode(writer)?;
-        }
-        self.data.encode(writer)?;
-
-        Ok(())
+        writer
+            .encode(&self.extended_type)?
+            .encode_opt(&self.metadata)?
+            .encode(&self.data)
     }
 }
 

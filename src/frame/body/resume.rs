@@ -1,6 +1,6 @@
 use derive_more::From;
 
-use super::util::chained;
+use super::util::{decode_chained, ChainedEncoder};
 use super::{codec::BodyCodec, Number, ResumeToken, Version};
 use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
@@ -16,7 +16,7 @@ pub struct Resume<'a> {
 
 impl<'a> Decodable<'a> for Resume<'a> {
     fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
-        chained(move |m| {
+        decode_chained(move |m| {
             Ok(Self {
                 version: m.next()?,
                 resume_identification_token: m.next()?,
@@ -28,16 +28,15 @@ impl<'a> Decodable<'a> for Resume<'a> {
 }
 
 impl Encodable for Resume<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        self.version.encode(writer)?;
-        self.resume_identification_token.encode(writer)?;
-        self.last_received_server_position.encode(writer)?;
-        self.first_available_client_position.encode(writer)?;
-
-        Ok(())
+        writer
+            .encode(&self.version)?
+            .encode(&self.resume_identification_token)?
+            .encode(&self.last_received_server_position)?
+            .encode(&self.first_available_client_position)
     }
 }
 

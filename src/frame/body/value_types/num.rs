@@ -46,7 +46,7 @@ macro_rules! impl_unit {
         }
 
         impl<const ALLOW_ZERO: bool> Encodable for Number<$t, ALLOW_ZERO> {
-            fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+            fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
             where
                 W: std::io::Write,
             {
@@ -54,7 +54,7 @@ macro_rules! impl_unit {
 
                 writer.$($enc)*(self.0)?;
 
-                Ok(())
+                Ok(writer)
             }
         }
     };

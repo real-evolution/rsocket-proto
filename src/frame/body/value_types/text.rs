@@ -34,13 +34,13 @@ impl<'a, C: TextCodec> Decodable<'a> for Text<'a, C> {
 }
 
 impl<C: TextCodec> Encodable for Text<'_, C> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
         writer.write_all(self.inner.as_bytes())?;
 
-        Ok(())
+        Ok(writer)
     }
 }
 

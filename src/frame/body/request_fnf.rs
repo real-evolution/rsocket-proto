@@ -1,5 +1,5 @@
 use super::codec::BodyCodec;
-use super::util::chained;
+use super::util::{decode_chained, ChainedEncoder};
 use super::{Data, PrefixedMetadata};
 use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
@@ -16,7 +16,7 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for RequestFNF<'a> {
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        chained(move |m| {
+        decode_chained(move |m| {
             Ok(Self {
                 metadata: m.next_with(cx)?,
                 data: m.next()?,
@@ -26,17 +26,11 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for RequestFNF<'a> {
 }
 
 impl Encodable for RequestFNF<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        if let Some(metadata) = &self.metadata {
-            metadata.encode(writer)?;
-        }
-
-        self.data.encode(writer)?;
-
-        Ok(())
+        writer.encode_opt(&self.metadata)?.encode(&self.data)
     }
 }
 

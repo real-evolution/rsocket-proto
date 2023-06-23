@@ -34,7 +34,7 @@ impl<'a> ContextDecodable<'a, &BodyDecodeContext> for Option<ResumeToken<'a>> {
 }
 
 impl Encodable for ResumeToken<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
@@ -43,6 +43,6 @@ impl Encodable for ResumeToken<'_> {
         writer.write_u16::<BE>(self.0.len() as u16)?;
         writer.write_all(self.0)?;
 
-        Ok(())
+        Ok(writer)
     }
 }

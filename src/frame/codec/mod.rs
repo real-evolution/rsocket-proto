@@ -9,7 +9,7 @@ pub(crate) trait ContextDecodable<'a, C>: Sized {
 }
 
 pub(crate) trait Encodable {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write;
 }

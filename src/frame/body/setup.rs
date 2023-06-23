@@ -1,5 +1,5 @@
 use super::codec::BodyCodec;
-use super::util::chained;
+use super::util::{decode_chained, ChainedEncoder};
 use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
 use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
@@ -22,7 +22,7 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Setup<'a> {
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        chained(move |m| {
+        decode_chained(move |m| {
             Ok(Self {
                 version: m.next()?,
                 keepalive: m.next()?,
@@ -38,32 +38,19 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Setup<'a> {
 }
 
 impl Encodable for Setup<'_> {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        // version
-        self.version.encode(writer)?;
-        // keepalive
-        self.keepalive.encode(writer)?;
-        // lifetime
-        self.lifetime.encode(writer)?;
-        // token (if present)
-        if let Some(token) = &self.token {
-            token.encode(writer)?;
-        }
-        // mime metadata
-        self.mime_metadata.encode(writer)?;
-        // mime data
-        self.mime_data.encode(writer)?;
-        // metadata (if present)
-        if let Some(metadata) = &self.metadata {
-            metadata.encode(writer)?;
-        }
-        // data
-        self.data.encode(writer)?;
-
-        Ok(())
+        writer
+            .encode(&self.version)?
+            .encode(&self.keepalive)?
+            .encode(&self.lifetime)?
+            .encode_opt(&self.token)?
+            .encode(&self.mime_metadata)?
+            .encode(&self.mime_data)?
+            .encode_opt(&self.metadata)?
+            .encode(&self.data)
     }
 }
 

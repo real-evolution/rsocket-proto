@@ -27,7 +27,7 @@ impl<'a> Decodable<'a> for ErrorCode {
 }
 
 impl Encodable for ErrorCode {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
@@ -35,6 +35,6 @@ impl Encodable for ErrorCode {
 
         writer.write_u32::<BE>(self.to_base_type())?;
 
-        Ok(())
+        Ok(writer)
     }
 }

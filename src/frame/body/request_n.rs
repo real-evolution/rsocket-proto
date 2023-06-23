@@ -1,3 +1,4 @@
+use super::util::ChainedEncoder;
 use super::{codec::BodyCodec, NonZero};
 use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
@@ -17,13 +18,11 @@ impl<'a> Decodable<'a> for RequestN {
 }
 
 impl Encodable for RequestN {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        self.request_n.encode(writer)?;
-
-        Ok(())
+        writer.encode(&self.request_n)
     }
 }
 

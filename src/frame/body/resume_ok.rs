@@ -1,3 +1,4 @@
+use super::util::ChainedEncoder;
 use super::{codec::BodyCodec, Number};
 use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
@@ -22,13 +23,11 @@ impl<'a> Decodable<'a> for ResumeOk {
 }
 
 impl Encodable for ResumeOk {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
-        self.last_received_client_position.encode(writer)?;
-
-        Ok(())
+        writer.encode(&self.last_received_client_position)
     }
 }
 

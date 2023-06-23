@@ -18,7 +18,7 @@ impl<'a> Decodable<'a> for Version {
 }
 
 impl Encodable for Version {
-    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write,
     {
@@ -27,7 +27,7 @@ impl Encodable for Version {
         writer.write_u16::<BE>(self.major)?;
         writer.write_u16::<BE>(self.minor)?;
 
-        Ok(())
+        Ok(writer)
     }
 }
 
