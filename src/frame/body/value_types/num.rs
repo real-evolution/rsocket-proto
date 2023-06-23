@@ -1,10 +1,13 @@
 use derive_more::Deref;
 use nom::combinator::verify;
 
-pub type NonZero<T> = Number<T, true>;
+use crate::frame::codec::Decodable;
+
+pub type NonZero<T> = Number<T, false>;
 
 #[derive(Debug, Clone, Deref)]
-pub struct Number<T, const ALLOW_ZERO: bool>(T);
+#[repr(transparent)]
+pub struct Number<T, const ALLOW_ZERO: bool = true>(T);
 
 pub trait NumTraits: Sized {
     fn zero() -> Self;
@@ -28,9 +31,8 @@ macro_rules! impl_unit {
             }
         }
 
-        impl<const ALLOW_ZERO: bool> Number<$t, ALLOW_ZERO> {
-            #[allow(unused)]
-            pub(crate) fn decode(input: &[u8]) -> nom::IResult<&[u8], Self> {
+        impl<'a, const ALLOW_ZERO: bool> Decodable<'a> for Number<$t, ALLOW_ZERO> {
+            fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
                 use nom::number::complete::$dec;
 
                 let (r, value) = if ALLOW_ZERO {
@@ -41,7 +43,9 @@ macro_rules! impl_unit {
 
                 Ok((r, Self(value)))
             }
+        }
 
+        impl<const ALLOW_ZERO: bool> Number<$t, ALLOW_ZERO> {
             #[allow(unused)]
             pub(crate) fn encode<'b, W: std::io::Write>(
                 &self,

@@ -1,11 +1,13 @@
 use derive_more::Deref;
 
-#[derive(Debug, Deref)]
+use crate::frame::codec::Decodable;
+
+#[derive(Debug, Clone, Deref)]
 #[repr(transparent)]
 pub struct MimeType<'a>(&'a str);
 
-impl<'a> MimeType<'a> {
-    pub(crate) fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
+impl<'a> Decodable<'a> for MimeType<'a> {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
         use nom::combinator::map_res;
         use nom::multi::length_data;
         use nom::number::complete::be_u8;
@@ -15,7 +17,9 @@ impl<'a> MimeType<'a> {
 
         Ok((r, Self(mime)))
     }
+}
 
+impl<'a> MimeType<'a> {
     pub(crate) fn encode<'b, W: std::io::Write>(
         &self,
         writer: &'b mut W,

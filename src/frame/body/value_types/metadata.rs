@@ -1,37 +1,17 @@
 use derive_more::Deref;
 
-use crate::frame::{codec, Flags};
+use crate::frame::codec::{ContextDecodable, Decodable, ParseContext};
+use crate::frame::Flags;
 
 pub type PrefixedMetadata<'a> = Metadata<'a, true>;
 pub type RestMetadata<'a> = Metadata<'a, false>;
 
-#[derive(Debug, Deref)]
+#[derive(Debug, Clone, Deref)]
 #[repr(transparent)]
 pub struct Metadata<'a, const HAS_LEN: bool>(&'a [u8]);
 
-impl<'a, const HAS_LEN: bool> Metadata<'a, HAS_LEN> {
-    pub(crate) fn decode_opt(
-        cx: &codec::ParseContext<'a>,
-    ) -> impl FnMut(
-        &'a [u8],
-    ) -> nom::IResult<&'a [u8], Option<Metadata<'a, HAS_LEN>>>
-           + 'a {
-        let flags = cx.header.flags;
-
-        move |input| {
-            if flags.contains(Flags::METADATA) {
-                return Ok((input, None));
-            }
-
-            let (rest, metadata) = Self::decode(input)?;
-
-            Ok((rest, Some(metadata)))
-        }
-    }
-
-    pub(crate) fn decode(
-        input: &'a [u8],
-    ) -> nom::IResult<&'a [u8], Metadata<'a, HAS_LEN>> {
+impl<'a, const HAS_LEN: bool> Decodable<'a> for Metadata<'a, HAS_LEN> {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
         use nom::combinator::rest;
         use nom::multi::length_data;
         use nom::number::complete::be_u24;
@@ -44,7 +24,28 @@ impl<'a, const HAS_LEN: bool> Metadata<'a, HAS_LEN> {
 
         Ok((rest, Self(metadata)))
     }
+}
 
+impl<'a, const HAS_LEN: bool> ContextDecodable<'a, &ParseContext<'a>>
+    for Option<Metadata<'a, HAS_LEN>>
+{
+    fn decode_with(
+        input: &'a [u8],
+        cx: &ParseContext<'a>,
+    ) -> nom::IResult<&'a [u8], Self> {
+        let flags = cx.header.flags;
+
+        if flags.contains(Flags::METADATA) {
+            return Ok((input, None));
+        }
+
+        let (rest, metadata) = Decodable::decode(input)?;
+
+        Ok((rest, Some(metadata)))
+    }
+}
+
+impl<'a, const HAS_LEN: bool> Metadata<'a, HAS_LEN> {
     pub(crate) fn encode<'b, W: std::io::Write>(
         &self,
         writer: &'b mut W,
