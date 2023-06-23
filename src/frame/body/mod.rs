@@ -33,7 +33,7 @@ pub use resume_ok::ResumeOk;
 pub use setup::Setup;
 pub use value_types::*;
 
-pub(super) use codec::*;
+pub(self) use codec::*;
 
 use derive_more::From;
 
