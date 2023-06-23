@@ -1,15 +1,16 @@
-use super::codec::BodyCodec;
 use super::util::{decode_chained, ChainedEncoder};
-use super::{Data, NonZero, PrefixedMetadata};
-use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
+use crate::frame::Flags;
 
 #[derive(Debug, Clone)]
 pub struct RequestChannel<'a> {
-    pub initial_request_n: NonZero<u32>,
-    pub metadata: Option<PrefixedMetadata<'a>>,
-    pub data: Data<'a>,
+    pub initial_request_n: super::NonZero<u32>,
+    pub metadata: Option<super::PrefixedMetadata<'a>>,
+    pub data: super::Data<'a>,
+}
+
+impl super::BodySpec for RequestChannel<'_> {
+    const FLAGS_MASK: Flags = crate::const_flags![METADATA | FOLLOW | COMPLETE];
 }
 
 impl<'a> ContextDecodable<'a, &super::BodyDecodeContext>
@@ -35,16 +36,5 @@ impl Encodable for RequestChannel<'_> {
         W: std::io::Write,
     {
         writer.encode_opt(&self.metadata)?.encode(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for RequestChannel<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(
-                Flags::METADATA | Flags::FOLLOW | Flags::COMPLETE,
-            )?
-            .done()
     }
 }

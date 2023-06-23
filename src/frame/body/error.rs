@@ -1,13 +1,14 @@
 use super::util::{decode_chained, ChainedEncoder};
-use super::{codec::BodyCodec, ErrorCode, Utf8Text};
-use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
-use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
 pub struct Error<'a> {
-    pub code: ErrorCode,
-    pub data: Utf8Text<'a>,
+    pub code: super::ErrorCode,
+    pub data: super::Utf8Text<'a>,
+}
+
+impl super::BodySpec for Error<'_> {
+    const FLAGS_MASK: crate::frame::Flags = crate::const_flags![];
 }
 
 impl<'a> Decodable<'a> for Error<'a> {
@@ -27,11 +28,5 @@ impl Encodable for Error<'_> {
         W: std::io::Write,
     {
         writer.encode(&self.code)?.encode(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for Error<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header.validate().has_empty_flags()?.done()
     }
 }

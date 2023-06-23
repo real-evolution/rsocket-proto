@@ -1,14 +1,15 @@
-use super::codec::BodyCodec;
 use super::util::{decode_chained, ChainedEncoder};
-use super::{Data, PrefixedMetadata};
-use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
+use crate::frame::Flags;
 
 #[derive(Debug, Clone)]
 pub struct RequestFNF<'a> {
-    pub metadata: Option<PrefixedMetadata<'a>>,
-    pub data: Data<'a>,
+    pub metadata: Option<super::PrefixedMetadata<'a>>,
+    pub data: super::Data<'a>,
+}
+
+impl super::BodySpec for RequestFNF<'_> {
+    const FLAGS_MASK: Flags = crate::const_flags![METADATA | FOLLOW];
 }
 
 impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for RequestFNF<'a> {
@@ -31,14 +32,5 @@ impl Encodable for RequestFNF<'_> {
         W: std::io::Write,
     {
         writer.encode_opt(&self.metadata)?.encode(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for RequestFNF<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(Flags::METADATA | Flags::FOLLOW)?
-            .done()
     }
 }

@@ -1,14 +1,15 @@
-use super::codec::BodyCodec;
 use super::util::{decode_chained, ChainedEncoder};
-use super::{Data, NonZero};
-use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
 pub struct Keepalive<'a> {
-    pub last_received_position: NonZero<u64>,
-    pub data: Data<'a>,
+    pub last_received_position: super::NonZero<u64>,
+    pub data: super::Data<'a>,
+}
+
+impl super::BodySpec for Keepalive<'_> {
+    const FLAGS_MASK: crate::frame::Flags = crate::const_flags![RESPOND];
+    const IS_CONNECTION_STREAM: bool = true;
 }
 
 impl<'a> Decodable<'a> for Keepalive<'a> {
@@ -30,15 +31,5 @@ impl Encodable for Keepalive<'_> {
         writer
             .encode(&self.last_received_position)?
             .encode(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for Keepalive<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(Flags::RESPOND)?
-            .in_stream(0)?
-            .done()
     }
 }

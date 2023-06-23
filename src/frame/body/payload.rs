@@ -1,15 +1,15 @@
-use derive_more::From;
-
 use super::util::{decode_chained, ChainedEncoder};
-use super::{codec::BodyCodec, Data, PrefixedMetadata};
-use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
 
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct Payload<'a> {
-    pub metadata: Option<PrefixedMetadata<'a>>,
-    pub data: Option<Data<'a>>,
+    pub metadata: Option<super::PrefixedMetadata<'a>>,
+    pub data: Option<super::Data<'a>>,
+}
+
+impl super::BodySpec for Payload<'_> {
+    const FLAGS_MASK: crate::frame::Flags =
+        crate::const_flags![METADATA | FOLLOW | COMPLETE | NEXT];
 }
 
 impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Payload<'a> {
@@ -32,16 +32,5 @@ impl Encodable for Payload<'_> {
         W: std::io::Write,
     {
         writer.encode_opt(&self.metadata)?.encode_opt(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for Payload<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(
-                Flags::METADATA | Flags::FOLLOW | Flags::COMPLETE | Flags::NEXT,
-            )?
-            .done()
     }
 }

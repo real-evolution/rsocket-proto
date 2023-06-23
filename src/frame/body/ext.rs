@@ -1,16 +1,16 @@
-use derive_more::From;
-
 use super::util::{decode_chained, ChainedEncoder};
-use super::{codec::BodyCodec, Data, Number, PrefixedMetadata};
-use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
+use crate::frame::Flags;
 
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct Ext<'a> {
-    pub extended_type: Number<u32>,
-    pub metadata: Option<PrefixedMetadata<'a>>,
-    pub data: Data<'a>,
+    pub extended_type: super::Number<u32>,
+    pub metadata: Option<super::PrefixedMetadata<'a>>,
+    pub data: super::Data<'a>,
+}
+
+impl super::BodySpec for Ext<'_> {
+    const FLAGS_MASK: Flags = crate::const_flags![IGNORE | METADATA];
 }
 
 impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Ext<'a> {
@@ -37,14 +37,5 @@ impl Encodable for Ext<'_> {
             .encode(&self.extended_type)?
             .encode_opt(&self.metadata)?
             .encode(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for Ext<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(Flags::IGNORE | Flags::METADATA)?
-            .done()
     }
 }

@@ -1,12 +1,13 @@
 use super::util::ChainedEncoder;
-use super::{codec::BodyCodec, NonZero};
-use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
-use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
 pub struct RequestN {
-    pub request_n: NonZero<u32>,
+    pub request_n: super::NonZero<u32>,
+}
+
+impl super::BodySpec for RequestN {
+    const FLAGS_MASK: crate::frame::Flags = crate::const_flags![];
 }
 
 impl<'a> Decodable<'a> for RequestN {
@@ -23,11 +24,5 @@ impl Encodable for RequestN {
         W: std::io::Write,
     {
         writer.encode(&self.request_n)
-    }
-}
-
-impl<'a> BodyCodec<'a> for RequestN {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header.validate().has_empty_flags()?.done()
     }
 }

@@ -1,17 +1,19 @@
 use super::util::ChainedEncoder;
-use super::{codec::BodyCodec, Number};
-use crate::error::RSocketResult;
 use crate::frame::codec::{Decodable, Encodable};
-use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
 pub struct ResumeOk {
-    pub last_received_client_position: Number<u64>,
+    pub last_received_client_position: super::Number<u64>,
+}
+
+impl super::BodySpec for ResumeOk {
+    const FLAGS_MASK: crate::frame::Flags = crate::const_flags![];
+    const IS_CONNECTION_STREAM: bool = true;
 }
 
 impl<'a> Decodable<'a> for ResumeOk {
     fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
-        let (rem, last_received_client_position) = Number::decode(input)?;
+        let (rem, last_received_client_position) = Decodable::decode(input)?;
 
         Ok((
             rem,
@@ -28,11 +30,5 @@ impl Encodable for ResumeOk {
         W: std::io::Write,
     {
         writer.encode(&self.last_received_client_position)
-    }
-}
-
-impl<'a> BodyCodec<'a> for ResumeOk {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header.validate().has_empty_flags()?.in_stream(0)?.done()
     }
 }

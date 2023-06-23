@@ -1,20 +1,22 @@
-use super::codec::BodyCodec;
 use super::util::{decode_chained, ChainedEncoder};
-use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
-use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
+use crate::frame::Flags;
 
 #[derive(Debug, Clone)]
 pub struct Setup<'a> {
-    pub version: Version,
-    pub keepalive: NonZero<u32>,
-    pub lifetime: NonZero<u32>,
-    pub token: Option<ResumeToken<'a>>,
-    pub mime_metadata: MimeType<'a>,
-    pub mime_data: MimeType<'a>,
-    pub metadata: Option<PrefixedMetadata<'a>>,
-    pub data: Data<'a>,
+    pub version: super::Version,
+    pub keepalive: super::NonZero<u32>,
+    pub lifetime: super::NonZero<u32>,
+    pub token: Option<super::ResumeToken<'a>>,
+    pub mime_metadata: super::MimeType<'a>,
+    pub mime_data: super::MimeType<'a>,
+    pub metadata: Option<super::PrefixedMetadata<'a>>,
+    pub data: super::Data<'a>,
+}
+
+impl super::BodySpec for Setup<'_> {
+    const FLAGS_MASK: Flags = crate::const_flags![METADATA | RESUME | LEASE];
+    const IS_CONNECTION_STREAM: bool = true;
 }
 
 impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Setup<'a> {
@@ -51,15 +53,5 @@ impl Encodable for Setup<'_> {
             .encode(&self.mime_data)?
             .encode_opt(&self.metadata)?
             .encode(&self.data)
-    }
-}
-
-impl<'a> BodyCodec<'a> for Setup<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(Flags::METADATA | Flags::RESUME | Flags::LEASE)?
-            .in_stream(0)?
-            .done()
     }
 }

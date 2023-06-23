@@ -1,14 +1,16 @@
 use super::util::{decode_chained, ChainedEncoder};
-use super::{codec::BodyCodec, NonZero, RestMetadata};
-use crate::error::RSocketResult;
 use crate::frame::codec::{ContextDecodable, Encodable};
-use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
 pub struct Lease<'a> {
-    pub ttl: NonZero<u32>,
-    pub number_of_requests: NonZero<u32>,
-    pub metadata: Option<RestMetadata<'a>>,
+    pub ttl: super::NonZero<u32>,
+    pub number_of_requests: super::NonZero<u32>,
+    pub metadata: Option<super::RestMetadata<'a>>,
+}
+
+impl super::BodySpec for Lease<'_> {
+    const FLAGS_MASK: crate::frame::Flags = crate::const_flags![METADATA];
+    const IS_CONNECTION_STREAM: bool = true;
 }
 
 impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Lease<'a> {
@@ -35,15 +37,5 @@ impl Encodable for Lease<'_> {
             .encode(&self.ttl)?
             .encode(&self.number_of_requests)?
             .encode_opt(&self.metadata)
-    }
-}
-
-impl<'a> BodyCodec<'a> for Lease<'a> {
-    fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
-        header
-            .validate()
-            .flags_match_mask(Flags::METADATA)?
-            .in_stream(0)?
-            .done()
     }
 }
