@@ -3,12 +3,12 @@ use std::io::Write;
 use crate::error::RSocketResult;
 use crate::frame::FrameHeader;
 
-use super::ParseContext;
+use super::BodyDecodeContext;
 
 pub(crate) trait BodyCodec<'a>: Sized {
     fn decode(
         input: &'a [u8],
-        cx: &ParseContext,
+        cx: &BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self>;
 
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()>;
@@ -33,7 +33,7 @@ where
     #[inline(always)]
     fn decode(
         input: &'a [u8],
-        _cx: &ParseContext,
+        _cx: &BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
         Ok((input, Default::default()))
     }

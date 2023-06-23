@@ -13,7 +13,7 @@ pub struct MetadataPush<'a> {
 impl<'a> BodyCodec<'a> for MetadataPush<'a> {
     fn decode(
         input: &'a [u8],
-        _cx: &super::ParseContext,
+        _cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let (rem, metadata) = Decodable::decode(input)?;
 

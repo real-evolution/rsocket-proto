@@ -34,11 +34,9 @@ pub use resume_ok::ResumeOk;
 pub use setup::Setup;
 pub use value_types::*;
 
-pub(crate) use codec::BodyCodec;
-
 use derive_more::From;
 
-use super::FrameHeader;
+use super::{codec::ContextDecodable, FrameHeader, FrameType};
 
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {
@@ -60,6 +58,6 @@ pub enum FrameBody<'a> {
 }
 
 #[derive(Debug)]
-pub(crate) struct ParseContext {
+pub(crate) struct BodyDecodeContext {
     pub(crate) header: FrameHeader,
 }

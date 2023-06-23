@@ -11,7 +11,7 @@ pub struct RequestN {
 impl<'a> BodyCodec<'a> for RequestN {
     fn decode(
         input: &'a [u8],
-        _cx: &super::ParseContext,
+        _cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let (rem, request_n) = Decodable::decode(input)?;
 

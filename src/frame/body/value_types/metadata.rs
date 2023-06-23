@@ -1,7 +1,7 @@
 use derive_more::Deref;
 
 use crate::frame::codec::{ContextDecodable, Decodable};
-use crate::frame::{Flags, ParseContext};
+use crate::frame::{Flags, BodyDecodeContext};
 
 pub type PrefixedMetadata<'a> = Metadata<'a, true>;
 pub type RestMetadata<'a> = Metadata<'a, false>;
@@ -26,12 +26,12 @@ impl<'a, const HAS_LEN: bool> Decodable<'a> for Metadata<'a, HAS_LEN> {
     }
 }
 
-impl<'a, const HAS_LEN: bool> ContextDecodable<'a, &ParseContext>
+impl<'a, const HAS_LEN: bool> ContextDecodable<'a, &BodyDecodeContext>
     for Option<Metadata<'a, HAS_LEN>>
 {
     fn decode_with(
         input: &'a [u8],
-        cx: &ParseContext,
+        cx: &BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
         let flags = cx.header.flags;
 

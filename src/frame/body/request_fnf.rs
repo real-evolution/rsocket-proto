@@ -13,7 +13,7 @@ pub struct RequestFNF<'a> {
 impl<'a> BodyCodec<'a> for RequestFNF<'a> {
     fn decode(
         input: &'a [u8],
-        cx: &super::ParseContext,
+        cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
         chained(move |m| {
             Ok(Self {

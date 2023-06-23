@@ -1,7 +1,7 @@
 use derive_more::Deref;
 
 use crate::frame::codec::{ContextDecodable, Decodable};
-use crate::frame::{Flags, ParseContext};
+use crate::frame::{Flags, BodyDecodeContext};
 
 #[derive(Debug, Clone, Deref)]
 #[repr(transparent)]
@@ -18,10 +18,10 @@ impl<'a> Decodable<'a> for ResumeToken<'a> {
     }
 }
 
-impl<'a> ContextDecodable<'a, &ParseContext> for Option<ResumeToken<'a>> {
+impl<'a> ContextDecodable<'a, &BodyDecodeContext> for Option<ResumeToken<'a>> {
     fn decode_with(
         input: &'a [u8],
-        cx: &ParseContext,
+        cx: &BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
         if cx.header.flags.contains(Flags::RESUME) {
             return Ok((input, None));
