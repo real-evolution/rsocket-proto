@@ -31,3 +31,29 @@ impl From<Flags> for u16 {
         value.bits()
     }
 }
+
+#[macro_export]
+macro_rules! const_flags {
+    () => {
+        $crate::frame::Flags::empty()
+    };
+
+    ($($t:tt)*) => {
+        $crate::frame::Flags::from_bits_truncate($crate::flags_to_bits!($($t)*))
+    };
+}
+
+#[macro_export]
+macro_rules! flags_to_bits {
+    ($x:ident) => {
+        $crate::frame::Flags::$x.bits()
+    };
+
+    (($($t:tt)+)) => {
+        $crate::flags_to_bits!($($t)+)
+    };
+
+    ($lhs:ident $op:tt $($rest:tt)+) => {
+        $crate::frame::Flags::$lhs.bits() $op $crate::flags_to_bits!($($rest)+)
+    };
+}
