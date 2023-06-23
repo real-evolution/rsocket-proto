@@ -1,11 +1,9 @@
-use derive_more::From;
-
 use super::{codec::BodyCodec, RestMetadata};
 use crate::error::RSocketResult;
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 use crate::frame::{Flags, FrameHeader};
 
-#[derive(Debug, Clone, From)]
+#[derive(Debug, Clone)]
 pub struct MetadataPush<'a> {
     pub metadata: RestMetadata<'a>,
 }
@@ -18,13 +16,18 @@ impl<'a> Decodable<'a> for MetadataPush<'a> {
     }
 }
 
-impl<'a> BodyCodec<'a> for MetadataPush<'a> {
-    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+impl Encodable for MetadataPush<'_> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         self.metadata.encode(writer)?;
 
         Ok(())
     }
+}
 
+impl<'a> BodyCodec<'a> for MetadataPush<'a> {
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
         header.validate().flag_is(Flags::METADATA, true)?.done()
     }

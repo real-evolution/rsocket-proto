@@ -1,4 +1,4 @@
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Version {
@@ -17,17 +17,17 @@ impl<'a> Decodable<'a> for Version {
     }
 }
 
-impl Version {
-    pub(crate) fn encode<'a, W: std::io::Write>(
-        &self,
-        writer: &'a mut W,
-    ) -> std::io::Result<&'a mut W> {
+impl Encodable for Version {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         use byteorder::{WriteBytesExt, BE};
 
         writer.write_u16::<BE>(self.major)?;
         writer.write_u16::<BE>(self.minor)?;
 
-        Ok(writer)
+        Ok(())
     }
 }
 

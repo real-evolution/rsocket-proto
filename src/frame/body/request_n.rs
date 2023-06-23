@@ -1,6 +1,6 @@
 use super::{codec::BodyCodec, NonZero};
 use crate::error::RSocketResult;
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
@@ -16,13 +16,18 @@ impl<'a> Decodable<'a> for RequestN {
     }
 }
 
-impl<'a> BodyCodec<'a> for RequestN {
-    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+impl Encodable for RequestN {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         self.request_n.encode(writer)?;
 
         Ok(())
     }
+}
 
+impl<'a> BodyCodec<'a> for RequestN {
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
         header.validate().has_empty_flags()?.done()
     }

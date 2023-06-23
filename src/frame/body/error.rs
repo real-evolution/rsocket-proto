@@ -1,9 +1,7 @@
-use std::io::Write;
-
 use super::util::chained;
 use super::{codec::BodyCodec, ErrorCode, Utf8Text};
 use crate::error::RSocketResult;
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone)]
@@ -23,14 +21,19 @@ impl<'a> Decodable<'a> for Error<'a> {
     }
 }
 
-impl<'a> BodyCodec<'a> for Error<'a> {
-    fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+impl Encodable for Error<'_> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         self.code.encode(writer)?;
         self.data.encode(writer)?;
 
         Ok(())
     }
+}
 
+impl<'a> BodyCodec<'a> for Error<'a> {
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
         header.validate().has_empty_flags()?.done()
     }

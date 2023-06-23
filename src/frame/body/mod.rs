@@ -36,7 +36,10 @@ pub use value_types::*;
 
 use derive_more::From;
 
-use super::{codec::ContextDecodable, FrameHeader, FrameType};
+use super::{
+    codec::{ContextDecodable, Encodable},
+    FrameHeader, FrameType,
+};
 
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {

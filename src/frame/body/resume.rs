@@ -3,7 +3,7 @@ use derive_more::From;
 use super::util::chained;
 use super::{codec::BodyCodec, Number, ResumeToken, Version};
 use crate::error::RSocketResult;
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 use crate::frame::FrameHeader;
 
 #[derive(Debug, Clone, From)]
@@ -27,8 +27,11 @@ impl<'a> Decodable<'a> for Resume<'a> {
     }
 }
 
-impl<'a> BodyCodec<'a> for Resume<'a> {
-    fn encode<W: std::io::Write>(&self, writer: &mut W) -> std::io::Result<()> {
+impl Encodable for Resume<'_> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         self.version.encode(writer)?;
         self.resume_identification_token.encode(writer)?;
         self.last_received_server_position.encode(writer)?;
@@ -36,7 +39,9 @@ impl<'a> BodyCodec<'a> for Resume<'a> {
 
         Ok(())
     }
+}
 
+impl<'a> BodyCodec<'a> for Resume<'a> {
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
         header.validate().has_empty_flags()?.in_stream(0)?.done()
     }

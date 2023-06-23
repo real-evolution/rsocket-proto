@@ -1,6 +1,6 @@
 use derive_more::Deref;
 
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 
 #[derive(Debug, Clone, Deref)]
 #[repr(transparent)]
@@ -19,11 +19,11 @@ impl<'a> Decodable<'a> for MimeType<'a> {
     }
 }
 
-impl<'a> MimeType<'a> {
-    pub(crate) fn encode<'b, W: std::io::Write>(
-        &self,
-        writer: &'b mut W,
-    ) -> std::io::Result<&'b mut W> {
+impl Encodable for MimeType<'_> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         use byteorder::WriteBytesExt;
 
         let buf = self.0.as_bytes();
@@ -31,6 +31,6 @@ impl<'a> MimeType<'a> {
         writer.write_u8(buf.len() as u8)?;
         writer.write_all(buf)?;
 
-        Ok(writer)
+        Ok(())
     }
 }

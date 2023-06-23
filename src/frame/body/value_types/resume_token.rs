@@ -1,7 +1,7 @@
 use derive_more::Deref;
 
-use crate::frame::codec::{ContextDecodable, Decodable};
-use crate::frame::{Flags, BodyDecodeContext};
+use crate::frame::codec::{ContextDecodable, Decodable, Encodable};
+use crate::frame::{BodyDecodeContext, Flags};
 
 #[derive(Debug, Clone, Deref)]
 #[repr(transparent)]
@@ -33,16 +33,16 @@ impl<'a> ContextDecodable<'a, &BodyDecodeContext> for Option<ResumeToken<'a>> {
     }
 }
 
-impl<'a> ResumeToken<'a> {
-    pub(crate) fn encode<'b, W: std::io::Write>(
-        &self,
-        writer: &'b mut W,
-    ) -> std::io::Result<&'b mut W> {
+impl Encodable for ResumeToken<'_> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         use byteorder::{WriteBytesExt, BE};
 
         writer.write_u16::<BE>(self.0.len() as u16)?;
         writer.write_all(self.0)?;
 
-        Ok(writer)
+        Ok(())
     }
 }

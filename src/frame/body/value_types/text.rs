@@ -1,6 +1,6 @@
 use derive_more::Deref;
 
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 
 pub type AsciiText<'a> = Text<'a, AsciiCodec>;
 pub type Utf8Text<'a> = Text<'a, Utf8Codec>;
@@ -33,14 +33,14 @@ impl<'a, C: TextCodec> Decodable<'a> for Text<'a, C> {
     }
 }
 
-impl<'a, C: TextCodec> Text<'a, C> {
-    pub(crate) fn encode<'b, W: std::io::Write>(
-        &self,
-        writer: &'b mut W,
-    ) -> std::io::Result<&'b mut W> {
+impl<C: TextCodec> Encodable for Text<'_, C> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         writer.write_all(self.inner.as_bytes())?;
 
-        Ok(writer)
+        Ok(())
     }
 }
 

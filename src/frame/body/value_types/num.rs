@@ -1,7 +1,7 @@
 use derive_more::Deref;
 use nom::combinator::verify;
 
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 
 pub type NonZero<T> = Number<T, false>;
 
@@ -45,24 +45,23 @@ macro_rules! impl_unit {
             }
         }
 
-        impl<const ALLOW_ZERO: bool> Number<$t, ALLOW_ZERO> {
-            #[allow(unused)]
-            pub(crate) fn encode<'b, W: std::io::Write>(
-                &self,
-                writer: &'b mut W,
-            ) -> std::io::Result<&'b mut W> {
-                use byteorder::{WriteBytesExt, BE};
+        impl<const ALLOW_ZERO: bool> Encodable for Number<$t, ALLOW_ZERO> {
+            fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+            where
+                W: std::io::Write,
+            {
+                use byteorder::{WriteBytesExt};
 
                 writer.$($enc)*(self.0)?;
 
-                Ok(writer)
+                Ok(())
             }
         }
     };
 }
 
 impl_unit!(u8: dec => be_u8, enc => write_u8);
-impl_unit!(u16: dec => be_u16, enc => write_u16::<BE>);
-impl_unit!(u32: dec => be_u32, enc => write_u32::<BE>);
-impl_unit!(u64: dec => be_u64, enc => write_u64::<BE>);
-impl_unit!(u128: dec => be_u128, enc => write_u128::<BE>);
+impl_unit!(u16: dec => be_u16, enc => write_u16::<byteorder::BE>);
+impl_unit!(u32: dec => be_u32, enc => write_u32::<byteorder::BE>);
+impl_unit!(u64: dec => be_u64, enc => write_u64::<byteorder::BE>);
+impl_unit!(u128: dec => be_u128, enc => write_u128::<byteorder::BE>);

@@ -6,7 +6,7 @@ use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, NonZero};
 use crate::error::RSocketResult;
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone, From)]
@@ -26,14 +26,16 @@ impl<'a> Decodable<'a> for Keepalive<'a> {
     }
 }
 
-impl<'a> BodyCodec<'a> for Keepalive<'a> {
+impl Encodable for Keepalive<'_> {
     fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
         self.last_received_position.encode(writer)?;
         self.data.encode(writer)?;
 
         Ok(())
     }
+}
 
+impl<'a> BodyCodec<'a> for Keepalive<'a> {
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
         header
             .validate()

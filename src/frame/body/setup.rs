@@ -1,10 +1,8 @@
-use std::io::Write;
-
 use super::codec::BodyCodec;
 use super::util::chained;
 use super::{Data, MimeType, NonZero, PrefixedMetadata, ResumeToken, Version};
 use crate::error::RSocketResult;
-use crate::frame::codec::ContextDecodable;
+use crate::frame::codec::{ContextDecodable, Encodable};
 use crate::frame::{Flags, FrameHeader};
 
 #[derive(Debug, Clone)]
@@ -39,8 +37,11 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Setup<'a> {
     }
 }
 
-impl<'a> BodyCodec<'a> for Setup<'a> {
-    fn encode<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+impl Encodable for Setup<'_> {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         // version
         self.version.encode(writer)?;
         // keepalive
@@ -64,7 +65,9 @@ impl<'a> BodyCodec<'a> for Setup<'a> {
 
         Ok(())
     }
+}
 
+impl<'a> BodyCodec<'a> for Setup<'a> {
     fn validate_header(header: &FrameHeader) -> RSocketResult<()> {
         header
             .validate()

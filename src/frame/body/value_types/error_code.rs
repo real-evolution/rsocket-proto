@@ -1,4 +1,4 @@
-use crate::frame::codec::Decodable;
+use crate::frame::codec::{Decodable, Encodable};
 
 #[derive(Debug, Clone)]
 #[from_to_repr::from_to_other(base_type = u32)]
@@ -26,15 +26,15 @@ impl<'a> Decodable<'a> for ErrorCode {
     }
 }
 
-impl ErrorCode {
-    pub(crate) fn encode<'b, W: std::io::Write>(
-        &self,
-        writer: &'b mut W,
-    ) -> std::io::Result<&'b mut W> {
+impl Encodable for ErrorCode {
+    fn encode<W>(&self, writer: &mut W) -> std::io::Result<()>
+    where
+        W: std::io::Write,
+    {
         use byteorder::{WriteBytesExt, BE};
 
         writer.write_u32::<BE>(self.to_base_type())?;
 
-        Ok(writer)
+        Ok(())
     }
 }
