@@ -1,4 +1,4 @@
-use crate::frame::codec::{Decodable, Encodable};
+use super::super::{Decodable, Encodable};
 
 #[derive(Debug, Clone)]
 #[from_to_repr::from_to_other(base_type = u32)]

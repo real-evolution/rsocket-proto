@@ -1,4 +1,5 @@
 mod cancel;
+mod codec;
 mod error;
 mod ext;
 mod keepalive;
@@ -13,7 +14,6 @@ mod request_stream;
 mod resume;
 mod resume_ok;
 mod setup;
-mod util;
 mod value_types;
 
 pub use cancel::Cancel;
@@ -33,9 +33,9 @@ pub use resume_ok::ResumeOk;
 pub use setup::Setup;
 pub use value_types::*;
 
-use derive_more::From;
+pub(super) use codec::*;
 
-use super::{codec::ContextDecodable, FrameHeader, FrameType};
+use derive_more::From;
 
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {
@@ -64,7 +64,7 @@ pub(crate) trait BodySpec {
 
 #[derive(Debug)]
 pub(crate) struct BodyDecodeContext {
-    pub(crate) header: FrameHeader,
+    pub(crate) header: crate::frame::FrameHeader,
 }
 
 impl<'a> ContextDecodable<'a, &BodyDecodeContext> for FrameBody<'a> {
@@ -72,7 +72,9 @@ impl<'a> ContextDecodable<'a, &BodyDecodeContext> for FrameBody<'a> {
         input: &'a [u8],
         cx: &BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        util::decode_chained(move |m| {
+        use crate::frame::FrameType;
+
+        decode_chained(move |m| {
             Ok(match cx.header.frame_type {
                 | FrameType::Setup => m.next_with::<Setup, _>(cx)?.into(),
                 | FrameType::Lease => m.next_with::<Lease, _>(cx)?.into(),

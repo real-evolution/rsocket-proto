@@ -1,6 +1,6 @@
 use derive_more::Deref;
 
-use crate::frame::codec::{Decodable, Encodable};
+use super::super::{Decodable, Encodable};
 
 pub type AsciiText<'a> = Text<'a, AsciiCodec>;
 pub type Utf8Text<'a> = Text<'a, Utf8Codec>;

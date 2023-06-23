@@ -1,5 +1,4 @@
-use super::util::ChainedEncoder;
-use crate::frame::codec::{Decodable, Encodable};
+use super::{ChainedEncoder, Decodable, Encodable};
 
 #[derive(Debug, Clone)]
 pub struct MetadataPush<'a> {

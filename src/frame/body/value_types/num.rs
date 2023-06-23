@@ -1,7 +1,7 @@
 use derive_more::Deref;
 use nom::combinator::verify;
 
-use crate::frame::codec::{Decodable, Encodable};
+use super::super::{Decodable, Encodable};
 
 pub type NonZero<T> = Number<T, false>;
 

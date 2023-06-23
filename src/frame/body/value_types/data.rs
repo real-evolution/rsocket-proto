@@ -1,6 +1,6 @@
 use derive_more::Deref;
 
-use crate::frame::codec::{ContextDecodable, Decodable, Encodable};
+use super::super::{ContextDecodable, Decodable, Encodable};
 use crate::frame::{BodyDecodeContext, Flags};
 
 #[derive(Debug, Clone, Deref)]

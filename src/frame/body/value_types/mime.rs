@@ -1,6 +1,6 @@
 use derive_more::Deref;
 
-use crate::frame::codec::{Decodable, Encodable};
+use super::super::{Decodable, Encodable};
 
 #[derive(Debug, Clone, Deref)]
 #[repr(transparent)]

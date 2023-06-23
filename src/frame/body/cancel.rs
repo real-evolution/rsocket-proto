@@ -1,4 +1,4 @@
-use crate::frame::codec::{Decodable, Encodable};
+use super::{Decodable, Encodable};
 
 #[derive(Debug, Clone)]
 pub struct Cancel;

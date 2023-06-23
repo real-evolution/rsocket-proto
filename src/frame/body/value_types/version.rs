@@ -1,4 +1,4 @@
-use crate::frame::codec::{Decodable, Encodable};
+use super::super::{Decodable, Encodable};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Version {

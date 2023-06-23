@@ -1,5 +1,4 @@
-use super::util::{decode_chained, ChainedEncoder};
-use crate::frame::codec::{ContextDecodable, Encodable};
+use super::{ChainedEncoder, ContextDecodable, Encodable};
 
 #[derive(Debug, Clone)]
 pub struct Payload<'a> {
@@ -17,7 +16,7 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Payload<'a> {
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        decode_chained(move |m| {
+        super::decode_chained(move |m| {
             Ok(Self {
                 metadata: m.next_with(cx)?,
                 data: m.next_with(cx)?,

@@ -1,5 +1,4 @@
-use super::util::{decode_chained, ChainedEncoder};
-use crate::frame::codec::{ContextDecodable, Encodable};
+use super::{ChainedEncoder, ContextDecodable, Encodable};
 use crate::frame::Flags;
 
 #[derive(Debug, Clone)]
@@ -18,7 +17,7 @@ impl<'a> ContextDecodable<'a, &super::BodyDecodeContext> for Ext<'a> {
         input: &'a [u8],
         cx: &super::BodyDecodeContext,
     ) -> nom::IResult<&'a [u8], Self> {
-        decode_chained(move |m| {
+        super::decode_chained(move |m| {
             Ok(Self {
                 extended_type: m.next()?,
                 metadata: m.next_with(cx)?,

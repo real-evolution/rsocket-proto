@@ -1,5 +1,4 @@
-use super::util::{decode_chained, ChainedEncoder};
-use crate::frame::codec::{Decodable, Encodable};
+use super::{ChainedEncoder, Decodable, Encodable};
 
 #[derive(Debug, Clone)]
 pub struct Keepalive<'a> {
@@ -14,7 +13,7 @@ impl super::BodySpec for Keepalive<'_> {
 
 impl<'a> Decodable<'a> for Keepalive<'a> {
     fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
-        decode_chained(move |m| {
+        super::decode_chained(move |m| {
             Ok(Self {
                 last_received_position: m.next()?,
                 data: m.next()?,

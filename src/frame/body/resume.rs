@@ -1,7 +1,6 @@
 use derive_more::From;
 
-use super::util::{decode_chained, ChainedEncoder};
-use crate::frame::codec::{Decodable, Encodable};
+use super::{ChainedEncoder, Decodable, Encodable};
 
 #[derive(Debug, Clone, From)]
 pub struct Resume<'a> {
@@ -18,7 +17,7 @@ impl super::BodySpec for Resume<'_> {
 
 impl<'a> Decodable<'a> for Resume<'a> {
     fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
-        decode_chained(move |m| {
+        super::decode_chained(move |m| {
             Ok(Self {
                 version: m.next()?,
                 resume_identification_token: m.next()?,

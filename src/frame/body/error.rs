@@ -1,5 +1,4 @@
-use super::util::{decode_chained, ChainedEncoder};
-use crate::frame::codec::{Decodable, Encodable};
+use super::{ChainedEncoder, Decodable, Encodable};
 
 #[derive(Debug, Clone)]
 pub struct Error<'a> {
@@ -13,7 +12,7 @@ impl super::BodySpec for Error<'_> {
 
 impl<'a> Decodable<'a> for Error<'a> {
     fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self> {
-        decode_chained(move |m| {
+        super::decode_chained(move |m| {
             Ok(Self {
                 code: m.next()?,
                 data: m.next()?,

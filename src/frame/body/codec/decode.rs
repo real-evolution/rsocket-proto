@@ -1,4 +1,10 @@
-use crate::frame::codec::Encodable;
+pub(crate) trait Decodable<'a>: Sized {
+    fn decode(input: &'a [u8]) -> nom::IResult<&'a [u8], Self>;
+}
+
+pub(crate) trait ContextDecodable<'a, C>: Sized {
+    fn decode_with(input: &'a [u8], cx: C) -> nom::IResult<&'a [u8], Self>;
+}
 
 pub(crate) type NomErr<I> = nom::Err<nom::error::Error<I>>;
 
@@ -9,7 +15,7 @@ impl<'a> ChainedDecoder<'a> {
     #[inline(always)]
     pub(crate) fn next<D>(&mut self) -> Result<D, NomErr<&'a [u8]>>
     where
-        D: crate::frame::codec::Decodable<'a>,
+        D: super::Decodable<'a>,
     {
         let out;
 
@@ -24,7 +30,7 @@ impl<'a> ChainedDecoder<'a> {
         cx: C,
     ) -> Result<D, NomErr<&'a [u8]>>
     where
-        D: crate::frame::codec::ContextDecodable<'a, C>,
+        D: super::ContextDecodable<'a, C>,
     {
         let out;
 
@@ -46,26 +52,5 @@ where
         let output = mapper(&mut decoder)?;
 
         Ok((decoder.0, output))
-    }
-}
-
-pub(crate) trait ChainedEncoder {
-    fn encode<'a, E: Encodable>(&'a mut self, item: &E) -> std::io::Result<&'a mut Self>;
-
-    fn encode_opt<'a, E: Encodable>(
-        &'a mut self,
-        item: &Option<E>,
-    ) -> std::io::Result<&'a mut Self> {
-        if let Some(ref item) = item {
-            self.encode(item)
-        } else {
-            Ok(self)
-        }
-    }
-}
-
-impl<W: std::io::Write> ChainedEncoder for W {
-    fn encode<'a, E: Encodable>(&'a mut self, item: &E) -> std::io::Result<&'a mut Self> {
-        item.encode(self)
     }
 }

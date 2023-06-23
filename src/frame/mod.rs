@@ -9,7 +9,7 @@ pub use primitives::*;
 
 use crate::error::{RSocketError, RSocketResult};
 
-use self::codec::ContextDecodable;
+use body::ContextDecodable;
 
 #[derive(Debug)]
 pub struct Frame<'a> {
