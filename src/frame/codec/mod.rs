@@ -1,3 +1,4 @@
+mod chained;
 mod context;
 mod num;
 mod sequence;
