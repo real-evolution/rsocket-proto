@@ -37,6 +37,8 @@ pub(super) use codec::*;
 
 use derive_more::From;
 
+use crate::error::{RSocketError, RSocketResult};
+
 #[derive(Debug, From)]
 pub enum FrameBody<'a> {
     Setup(Setup<'a>),
@@ -67,40 +69,102 @@ pub(crate) struct BodyDecodeContext {
     pub(crate) header: crate::frame::FrameHeader,
 }
 
-impl<'a> ContextDecodable<'a, &BodyDecodeContext> for FrameBody<'a> {
-    fn decode_with(
+impl<'a> FrameBody<'a> {
+    pub(crate) fn decode(
         input: &'a [u8],
         cx: &BodyDecodeContext,
-    ) -> nom::IResult<&'a [u8], Self> {
+    ) -> RSocketResult<Self> {
         use crate::frame::FrameType;
 
-        decode_chained(move |m| {
-            Ok(match cx.header.frame_type {
-                | FrameType::Setup => m.next_with::<Setup, _>(cx)?.into(),
-                | FrameType::Lease => m.next_with::<Lease, _>(cx)?.into(),
-                | FrameType::Keepalive => m.next::<Keepalive>()?.into(),
+        match cx.header.frame_type {
+            | FrameType::Setup => Self::take::<Setup>(input, cx),
+            | FrameType::Lease => Self::take::<Lease>(input, cx),
+            | FrameType::Keepalive => Self::take::<Keepalive>(input, cx),
+            | FrameType::RequestResponse => {
+                Self::take::<RequestResponse>(input, cx)
+            }
+            | FrameType::RequestFNF => Self::take::<RequestFNF>(input, cx),
+            | FrameType::RequestStream => {
+                Self::take::<RequestStream>(input, cx)
+            }
+            | FrameType::RequestChannel => {
+                Self::take::<RequestChannel>(input, cx)
+            }
+            | FrameType::RequestN => Self::take::<RequestN>(input, cx),
+            | FrameType::Cancel => Self::take::<Cancel>(input, cx),
+            | FrameType::Payload => Self::take::<Payload>(input, cx),
+            | FrameType::Error => Self::take::<Error>(input, cx),
+            | FrameType::MetadataPush => Self::take::<MetadataPush>(input, cx),
+            | FrameType::Resume => Self::take::<Resume>(input, cx),
+            | FrameType::ResumeOk => Self::take::<ResumeOk>(input, cx),
+            | FrameType::Other(t) => Err(RSocketError::UnknownFrameType(t)),
+        }
+    }
+}
 
-                | FrameType::RequestResponse => {
-                    m.next_with::<RequestResponse, _>(cx)?.into()
-                }
-                | FrameType::RequestFNF => {
-                    m.next_with::<RequestFNF, _>(cx)?.into()
-                }
-                | FrameType::RequestStream => {
-                    m.next_with::<RequestStream, _>(cx)?.into()
-                }
-                | FrameType::RequestChannel => {
-                    m.next_with::<RequestChannel, _>(cx)?.into()
-                }
-                | FrameType::RequestN => m.next::<RequestN>()?.into(),
-                | FrameType::Cancel => m.next::<Cancel>()?.into(),
-                | FrameType::Payload => m.next_with::<Payload, _>(cx)?.into(),
-                | FrameType::Error => m.next::<Error>()?.into(),
-                | FrameType::MetadataPush => m.next::<MetadataPush>()?.into(),
-                | FrameType::Resume => m.next::<Resume>()?.into(),
-                | FrameType::ResumeOk => m.next::<ResumeOk>()?.into(),
-                | FrameType::Other(_) => todo!(),
-            })
-        })(input)
+impl<'a, 'b> FrameBody<'a> {
+    fn take<B>(
+        input: &'a [u8],
+        cx: &'b BodyDecodeContext,
+    ) -> RSocketResult<Self>
+    where
+        B: ContextDecodable<'a, &'b BodyDecodeContext> + Into<Self> + BodySpec,
+    {
+        let (rem, body) = B::decode_with(input, cx)?;
+
+        if !rem.is_empty() {
+            return Err(RSocketError::BufferLength(
+                "input buffer was left with remaining bytes",
+            ));
+        }
+
+        Self::validate::<B>(cx)?;
+
+        Ok(body.into())
+    }
+
+    #[inline(always)]
+    fn validate<B>(cx: &BodyDecodeContext) -> RSocketResult<()>
+    where
+        B: BodySpec,
+    {
+        let crate::frame::FrameHeader {
+            stream_id, flags, ..
+        } = cx.header;
+
+        if B::IS_CONNECTION_STREAM && stream_id != 0 {
+            return Err(RSocketError::UnexpectedStreamId {
+                expected: 0,
+                actual: cx.header.stream_id,
+            });
+        }
+
+        if !B::REQUIRED_FLAGS.is_empty()
+            && !cx.header.flags.contains(B::REQUIRED_FLAGS)
+        {
+            return Err(RSocketError::UnexpectedFlagValue {
+                flag: B::REQUIRED_FLAGS,
+                expected_value: true,
+            });
+        }
+
+        if cx.header.flags.contains(!B::FLAGS_MASK) {
+            return Err(RSocketError::UnexpectedFlags {
+                flags,
+                mask: B::FLAGS_MASK,
+            });
+        }
+
+        Ok(())
+    }
+}
+
+impl<'a, B: Decodable<'a>> ContextDecodable<'a, &BodyDecodeContext> for B {
+    #[inline(always)]
+    fn decode_with(
+        input: &'a [u8],
+        _cx: &BodyDecodeContext,
+    ) -> nom::IResult<&'a [u8], Self> {
+        <Self as Decodable<'a>>::decode(input)
     }
 }

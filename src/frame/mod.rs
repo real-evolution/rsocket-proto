@@ -5,9 +5,7 @@ mod header;
 pub use body::*;
 pub use header::*;
 
-use crate::error::{RSocketError, RSocketResult};
-
-use body::ContextDecodable;
+use crate::error::RSocketResult;
 
 #[derive(Debug)]
 pub struct Frame<'a> {
@@ -44,14 +42,7 @@ impl<'a> Frame<'a> {
 
     pub fn decode(input: &'a [u8]) -> RSocketResult<Self> {
         let (rem, header) = FrameHeader::decode(input)?;
-        let (rem, body) =
-            FrameBody::decode_with(rem, &BodyDecodeContext { header })?;
-
-        if !rem.is_empty() {
-            return Err(RSocketError::BufferLength(
-                "input buffer was left with remaining bytes",
-            ));
-        }
+        let body = FrameBody::decode(rem, &BodyDecodeContext { header })?;
 
         Ok(Self {
             header,
