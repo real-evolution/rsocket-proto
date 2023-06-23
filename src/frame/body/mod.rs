@@ -57,6 +57,12 @@ pub enum FrameBody<'a> {
     ResumeOk(ResumeOk),
 }
 
+pub(crate) trait BodySpec {
+    const FLAGS_MASK: super::Flags;
+    const REQUIRED_FLAGS: super::Flags = super::Flags::empty();
+    const IS_CONNECTION_STREAM: bool = false;
+}
+
 #[derive(Debug)]
 pub(crate) struct BodyDecodeContext {
     pub(crate) header: FrameHeader,
