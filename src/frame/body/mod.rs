@@ -1,5 +1,4 @@
 mod cancel;
-mod codec;
 mod error;
 mod ext;
 mod keepalive;
@@ -33,10 +32,9 @@ pub use resume_ok::ResumeOk;
 pub use setup::Setup;
 pub use value_types::*;
 
-pub(self) use codec::*;
-
 use derive_more::From;
 
+use crate::frame::codec::*;
 use crate::error::{RSocketError, RSocketResult};
 
 #[derive(Debug, From)]

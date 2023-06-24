@@ -1,5 +1,6 @@
 mod body;
 mod header;
+mod codec;
 
 pub use body::*;
 pub use header::*;
