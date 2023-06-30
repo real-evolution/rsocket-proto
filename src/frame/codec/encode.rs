@@ -1,9 +1,11 @@
+#[deprecated]
 pub(crate) trait Encodable {
     fn encode<'a, W>(&self, writer: &'a mut W) -> std::io::Result<&'a mut W>
     where
         W: std::io::Write;
 }
 
+#[deprecated]
 pub(crate) trait ChainedEncoder {
     fn encode<'a, E: super::Encodable>(
         &'a mut self,
