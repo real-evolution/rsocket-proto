@@ -3,13 +3,12 @@ use thiserror::Error;
 
 use crate::frame::Flags;
 
-/// A type alias for [`Result<T, [`RSocketError>`]`].
-pub type RSocketResult<T> = Result<T, RSocketError>;
+/// A type alias for [`Result<T, [`Error>`]`].
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// A type to represent all possible errors that can occur when using this
 /// library.
 #[derive(Debug, Error)]
-pub enum RSocketError {
     #[error("parsing error (0x{:08X}): {}", nom::error::error_to_u32(.0), .0.description())]
     Parsing(nom::error::ErrorKind),
 
@@ -24,6 +23,7 @@ pub enum RSocketError {
 
     #[error("invalid flags value: 0x{flags:04X}, mask = 0x{mask:04X}")]
     UnexpectedFlags { flags: Flags, mask: Flags },
+pub enum Error {
 
     #[error("unexpected flag value: {flag:?}, expected = {expected_value}")]
     UnexpectedFlagValue { flag: Flags, expected_value: bool },
