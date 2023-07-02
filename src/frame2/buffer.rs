@@ -6,6 +6,8 @@ use super::FrameHeader;
 pub type Buffer = BufferWrapper<bytes::Bytes>;
 pub type BufferMut = BufferWrapper<bytes::BytesMut>;
 
+/// A wrapper type for buffers to add frame header context to using
+/// encoders/ecoders.
 #[derive(Debug, Clone, Deref)]
 pub struct BufferWrapper<B> {
     #[deref]
@@ -14,14 +16,25 @@ pub struct BufferWrapper<B> {
 }
 
 impl<B> BufferWrapper<B> {
+    /// Creates a new [`BufferWrapper<B>`] instance.
+    ///
+    /// # Parameters
+    /// * `inner`: The inner buffer type to wrap.
+    /// * `header`: Context header value.
+    ///
+    /// # Returns
+    /// The created [`BufferWrapper<B>`] instance.
     pub fn new(inner: B, header: super::FrameHeader) -> Self {
         Self { inner, header }
     }
 
+    /// Gets the inner header value.
     pub fn header(&self) -> &FrameHeader {
         &self.header
     }
 
+    /// Splits [`self`] into a tuple of the wrapped buffer and the context
+    /// header.
     pub fn into_parts(self) -> (B, FrameHeader) {
         (self.inner, self.header)
     }
