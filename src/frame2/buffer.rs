@@ -21,6 +21,10 @@ impl<B> BufferWrapper<B> {
     pub fn header(&self) -> &FrameHeader {
         &self.header
     }
+
+    pub fn into_parts(self) -> (B, FrameHeader) {
+        (self.inner, self.header)
+    }
 }
 
 impl bytes::Buf for Buffer {
