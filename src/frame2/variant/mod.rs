@@ -16,7 +16,19 @@ impl recode::Decoder<Buffer> for FrameVariant {
     type Error = crate::Error;
 
     fn decode(buf: &mut Buffer) -> Result<Self, Self::Error> {
-        match buf.header().frame_type() {
+        let h = buf.header();
+
+        if h.frame_type()
+            .flags_mask()
+            .complement()
+            .intersects(h.flags())
+        {
+            return Err(crate::Error::ProtocolViolation(
+                "unexpected flags detected",
+            ));
+        }
+
+        match h.frame_type() {
             | FrameType::Setup => Setup::decode(buf).map(Into::into),
             | _ => unreachable!(),
         }
