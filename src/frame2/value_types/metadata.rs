@@ -1,5 +1,7 @@
 use std::ops::Deref;
 
+use derive_more::Deref;
+
 use recode::bytes::{Buf, Bytes};
 use recode::util::EncoderExt;
 use recode::{codec, Decoder, Encoder};
@@ -9,7 +11,7 @@ use crate::frame2::{Buffer, BufferMut, Flags, FrameType};
 type UnprefixedBuffer = codec::Buffer<recode::util::Remaining>;
 type PrefixedBuffer = codec::Buffer<codec::u24>;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Deref)]
 pub struct Metadata(Bytes);
 
 impl Decoder<Buffer> for Metadata {
@@ -94,15 +96,6 @@ impl Encoder<BufferMut> for Option<Metadata> {
         };
 
         item.encode_to(buf)
-    }
-}
-
-impl Deref for Metadata {
-    type Target = Bytes;
-
-    #[inline]
-    fn deref(&self) -> &Self::Target {
-        &self.0
     }
 }
 

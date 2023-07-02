@@ -1,13 +1,14 @@
+use derive_more::Deref;
 use recode::bytes;
-use std::ops::Deref;
 
 use super::FrameHeader;
 
 pub type Buffer = BufferWrapper<bytes::Bytes>;
 pub type BufferMut = BufferWrapper<bytes::BytesMut>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deref)]
 pub struct BufferWrapper<B> {
+    #[deref]
     inner: B,
     header: FrameHeader,
 }
@@ -77,13 +78,5 @@ unsafe impl bytes::BufMut for BufferMut {
     #[inline]
     fn put_bytes(&mut self, val: u8, cnt: usize) {
         self.inner.put_bytes(val, cnt)
-    }
-}
-
-impl<B> Deref for BufferWrapper<B> {
-    type Target = B;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
     }
 }
