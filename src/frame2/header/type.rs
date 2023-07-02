@@ -21,3 +21,28 @@ pub enum FrameType {
     Ext = 0x3F,
     Other(u8),
 }
+
+impl FrameType {
+    pub const fn flags_mask(&self) -> super::Flags {
+        use crate::const_flags as f;
+
+        match self {
+            | FrameType::Setup => f![METADATA | RESUME | LEASE],
+            | FrameType::Lease => f![METADATA],
+            | FrameType::Keepalive => f![RESPOND],
+            | FrameType::RequestResponse => f![METADATA | FOLLOW],
+            | FrameType::RequestFNF => f![METADATA | FOLLOW],
+            | FrameType::RequestStream => f![METADATA | FOLLOW],
+            | FrameType::RequestChannel => f![METADATA | FOLLOW | COMPLETE],
+            | FrameType::RequestN => f![],
+            | FrameType::Cancel => f![],
+            | FrameType::Payload => f![METADATA | FOLLOW | COMPLETE | NEXT],
+            | FrameType::Error => f![],
+            | FrameType::MetadataPush => f![METADATA],
+            | FrameType::Resume => f![],
+            | FrameType::ResumeOk => f![],
+            | FrameType::Ext => f![IGNORE | METADATA],
+            | FrameType::Other(_) => f![],
+        }
+    }
+}
