@@ -36,3 +36,45 @@ bitflags! {
         const RESPOND = Self::FOLLOW.bits();
     }
 }
+
+/// Creates a value of type [`Flags`] at compile time.
+///
+/// This macro removes the boilerplate required to create constant [`Flags`]
+/// values at compile time.
+///
+/// # Example
+/// ```rust
+///  struct MyType;
+///
+///  impl MyType {
+///     const FLAGS_MASK: Flags = crate::const_flags![METADATA | RESUME | LEASE];
+///  }
+///
+/// ```
+#[macro_export]
+macro_rules! const_flags {
+    () => {
+        $crate::frame2::Flags::empty()
+    };
+
+    ($($t:tt)*) => {
+        $crate::frame2::Flags::from_bits_truncate($crate::flags_to_bits!($($t)*))
+    };
+}
+
+/// Converts an expression that uses [`Flags`] constants into an expression
+/// that uses the backing vaue of [`Flags`] ([`u16`]).
+#[macro_export]
+macro_rules! flags_to_bits {
+    ($x:ident) => {
+        $crate::frame2::Flags::$x.bits()
+    };
+
+    (($($t:tt)+)) => {
+        $crate::flags_to_bits!($($t)+)
+    };
+
+    ($lhs:ident $op:tt $($rest:tt)+) => {
+        $crate::frame2::Flags::$lhs.bits() $op $crate::flags_to_bits!($($rest)+)
+    };
+}
