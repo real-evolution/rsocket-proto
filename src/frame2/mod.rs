@@ -1,7 +1,11 @@
 mod buffer;
+mod header;
+mod value_types;
 
 use recode::bytes::Bytes;
 pub use buffer::*;
+pub use header::*;
+pub use value_types::*;
 
 #[derive(Debug)]
 pub struct StreamFrame {
