@@ -1,6 +1,8 @@
 mod metadata;
+mod num;
 mod version;
 
+pub use self::num::NonZero;
 pub use metadata::Metadata;
 pub use version::Version;
 
