@@ -10,9 +10,19 @@ pub use value_types::*;
 pub use variant::*;
 
 #[derive(Debug)]
-pub struct StreamFrame {
-    pub stream_id: u32,
-    pub frame: FrameVariant,
-    pub raw: Bytes,
+pub struct Frame {
+    header: FrameHeader,
+    variant: FrameVariant,
 }
 
+impl Frame {
+    #[inline]
+    pub fn header(&self) -> &FrameHeader {
+        &self.header
+    }
+
+    #[inline]
+    pub fn variant(&self) -> &FrameVariant {
+        &self.variant
+    }
+}
