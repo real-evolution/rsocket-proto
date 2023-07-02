@@ -1,5 +1,7 @@
+mod buffer;
 
 use recode::bytes::Bytes;
+pub use buffer::*;
 
 #[derive(Debug)]
 pub struct StreamFrame {
