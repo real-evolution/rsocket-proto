@@ -11,6 +11,7 @@ use crate::frame2::{Buffer, BufferMut, Flags, FrameType};
 type UnprefixedBuffer = codec::Buffer<recode::util::Remaining>;
 type PrefixedBuffer = codec::Buffer<codec::u24>;
 
+/// A value type wrapper to represent frames metadata.
 #[derive(Debug, Clone, Default, Deref)]
 pub struct Metadata(Bytes);
 
@@ -100,6 +101,7 @@ impl Encoder<BufferMut> for Option<Metadata> {
 }
 
 impl FrameType {
+    /// Gets whether the frame type supports metadata or not.
     #[inline]
     pub const fn supports_metadata(&self) -> bool {
         match self {
@@ -111,6 +113,7 @@ impl FrameType {
         }
     }
 
+    /// Gets whether the frame type requires metadata or not.
     #[inline]
     pub const fn requires_metadata(&self) -> bool {
         matches!(self, FrameType::MetadataPush)
