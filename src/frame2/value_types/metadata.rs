@@ -19,7 +19,11 @@ impl Decoder<Buffer> for Metadata {
     type Error = crate::Error;
 
     fn decode(buf: &mut Buffer) -> Result<Metadata, Self::Error> {
-        debug_assert!(buf.header().flags().contains(Flags::METADATA));
+        if !buf.header().flags().contains(Flags::METADATA) {
+            return Err(Self::Error::ProtocolViolation(
+                "frame header does not contain metadata flag",
+            ));
+        }
 
         if !buf.header().frame_type().supports_metadata() {
             return Err(Self::Error::ProtocolViolation(
