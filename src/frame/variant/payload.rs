@@ -12,7 +12,11 @@ impl Decoder<super::Buffer> for Payload {
     type Error = crate::Error;
 
     fn decode(buf: &mut super::Buffer) -> Result<Self, Self::Error> {
-        if buf.header().flags().contains(Flags::COMPLETE | Flags::NEXT) {
+        if buf
+            .context()
+            .flags()
+            .contains(Flags::COMPLETE | Flags::NEXT)
+        {
             return Err(crate::Error::ProtocolViolation(
                 "payloads cannot have both COMPLETE and NEXT flags set",
             ));
@@ -20,7 +24,7 @@ impl Decoder<super::Buffer> for Payload {
 
         let metadata = Option::<super::Metadata>::decode(buf)?;
         let data = if buf.has_remaining() {
-            if !buf.header().flags().contains(Flags::NEXT) {
+            if !buf.context().flags().contains(Flags::NEXT) {
                 return Err(crate::Error::ProtocolViolation(
                     "payloads without NEXT flag must be empty",
                 ));
@@ -43,12 +47,14 @@ impl Encoder<super::BufferMut> for Payload {
         buf: &mut super::BufferMut,
     ) -> Result<(), Self::Error> {
         debug_assert!(
-            !buf.header().flags().contains(Flags::COMPLETE | Flags::NEXT),
+            !buf.context()
+                .flags()
+                .contains(Flags::COMPLETE | Flags::NEXT),
             "an attempt to encode payload with both COMPLETE and NEXT flags",
         );
 
         debug_assert!(
-            item.data.is_some() ^ !buf.header().flags().contains(Flags::NEXT),
+            item.data.is_some() ^ !buf.context().flags().contains(Flags::NEXT),
             "an attempt to encode payload with NEXT flag but without data",
         );
 

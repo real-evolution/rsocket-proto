@@ -19,19 +19,19 @@ impl Decoder<Buffer> for Metadata {
     type Error = crate::Error;
 
     fn decode(buf: &mut Buffer) -> Result<Metadata, Self::Error> {
-        if !buf.header().flags().contains(Flags::METADATA) {
+        if !buf.context().flags().contains(Flags::METADATA) {
             return Err(Self::Error::ProtocolViolation(
                 "frame header does not contain metadata flag",
             ));
         }
 
-        if !buf.header().frame_type().supports_metadata() {
+        if !buf.context().frame_type().supports_metadata() {
             return Err(Self::Error::ProtocolViolation(
                 "frame does not support metadata",
             ));
         }
 
-        let inner = match buf.header().frame_type() {
+        let inner = match buf.context().frame_type() {
             | FrameType::MetadataPush => buf.copy_to_bytes(buf.remaining()),
             | _ => PrefixedBuffer::decode(buf)?.deref().clone(),
         };
@@ -44,8 +44,8 @@ impl Decoder<Buffer> for Option<Metadata> {
     type Error = crate::Error;
 
     fn decode(buf: &mut Buffer) -> Result<Option<Metadata>, Self::Error> {
-        if !buf.header().flags().contains(Flags::METADATA) {
-            return if buf.header().frame_type().requires_metadata() {
+        if !buf.context().flags().contains(Flags::METADATA) {
+            return if buf.context().frame_type().requires_metadata() {
                 Err(Self::Error::ProtocolViolation(
                     "METADATA_PUSH frame type requires metadata",
                 ))
@@ -62,12 +62,12 @@ impl Encoder<BufferMut> for Metadata {
     type Error = crate::Error;
 
     fn encode(item: &Metadata, buf: &mut BufferMut) -> Result<(), Self::Error> {
-        debug_assert!(buf.header().flags().contains(Flags::METADATA));
-        debug_assert!(buf.header().frame_type().supports_metadata());
+        debug_assert!(buf.context().flags().contains(Flags::METADATA));
+        debug_assert!(buf.context().frame_type().supports_metadata());
 
         let inner = item.0.clone();
 
-        match buf.header().frame_type() {
+        match buf.context().frame_type() {
             | FrameType::MetadataPush => {
                 UnprefixedBuffer::new(inner).encode_to(buf)
             }
@@ -84,14 +84,14 @@ impl Encoder<BufferMut> for Option<Metadata> {
         item: &Option<Metadata>,
         buf: &mut BufferMut,
     ) -> Result<(), Self::Error> {
-        if buf.header().flags().contains(Flags::METADATA) ^ item.is_some() {
+        if buf.context().flags().contains(Flags::METADATA) ^ item.is_some() {
             return Err(Self::Error::ProtocolViolation(
                 "incosistent METADATA flag",
             ));
         }
 
         let Some(ref item) = item else {
-            if buf.header().frame_type().requires_metadata() {
+            if buf.context().frame_type().requires_metadata() {
                 return Err(Self::Error::ProtocolViolation(
                     "METADATA_PUSH frame type requires metadata",
                 ));

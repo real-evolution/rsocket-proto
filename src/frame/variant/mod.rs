@@ -58,7 +58,7 @@ impl recode::Decoder<Buffer> for FrameVariant {
     type Error = crate::Error;
 
     fn decode(buf: &mut Buffer) -> Result<Self, crate::Error> {
-        let h = buf.header();
+        let h = buf.context();
 
         if h.frame_type()
             .flags_mask()
