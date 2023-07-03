@@ -1,5 +1,6 @@
 mod cancel;
 mod error;
+mod ext;
 mod keepalive;
 mod lease;
 mod metadata_push;
@@ -13,6 +14,7 @@ mod setup;
 
 pub use cancel::Cancel;
 pub use error::{Error, ErrorCode};
+pub use ext::Ext;
 pub use keepalive::Keepalive;
 pub use lease::Lease;
 pub use metadata_push::MetadataPush;
@@ -43,6 +45,7 @@ pub enum FrameVariant {
     Cancel(Cancel),
     Payload(Payload),
     MetadataPush(MetadataPush),
+    Ext(Ext),
 }
 
 impl recode::Decoder<Buffer> for FrameVariant {
@@ -82,6 +85,7 @@ impl recode::Decoder<Buffer> for FrameVariant {
             | FrameType::Cancel => decode::<Cancel>(buf),
             | FrameType::Payload => decode::<Payload>(buf),
             | FrameType::MetadataPush => decode::<MetadataPush>(buf),
+            | FrameType::Ext => decode::<Ext>(buf),
             | _ => unreachable!(),
         }
     }
@@ -104,6 +108,7 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::Cancel(v) => v.encode_to(buf),
             | FrameVariant::Payload(v) => v.encode_to(buf),
             | FrameVariant::MetadataPush(v) => v.encode_to(buf),
+            | FrameVariant::Ext(v) => v.encode_to(buf),
         }
     }
 }
