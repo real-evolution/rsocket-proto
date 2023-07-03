@@ -1,3 +1,4 @@
+mod cancel;
 mod error;
 mod keepalive;
 mod lease;
@@ -8,6 +9,7 @@ mod request_response;
 mod request_stream;
 mod setup;
 
+pub use cancel::Cancel;
 pub use error::{Error, ErrorCode};
 pub use keepalive::Keepalive;
 pub use lease::Lease;
@@ -34,6 +36,7 @@ pub enum FrameVariant {
     RequestStream(RequestStream),
     RequestChannel(RequestChannel),
     RequestN(RequestN),
+    Cancel(Cancel),
 }
 
 impl recode::Decoder<Buffer> for FrameVariant {
@@ -70,6 +73,7 @@ impl recode::Decoder<Buffer> for FrameVariant {
             | FrameType::RequestStream => decode::<RequestStream>(buf),
             | FrameType::RequestChannel => decode::<RequestChannel>(buf),
             | FrameType::RequestN => decode::<RequestN>(buf),
+            | FrameType::Cancel => decode::<Cancel>(buf),
             | _ => unreachable!(),
         }
     }
@@ -89,6 +93,7 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::RequestStream(v) => v.encode_to(buf),
             | FrameVariant::RequestChannel(v) => v.encode_to(buf),
             | FrameVariant::RequestN(v) => v.encode_to(buf),
+            | FrameVariant::Cancel(v) => v.encode_to(buf),
         }
     }
 }
