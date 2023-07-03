@@ -1,15 +1,17 @@
-mod buffer;
 mod header;
+mod mux;
 mod value_types;
 mod variant;
 
-pub use buffer::*;
 pub use header::*;
 pub use value_types::*;
 pub use variant::*;
 
 use recode::bytes::{Bytes, BytesMut};
 use recode::{util::EncoderExt, Decoder, Encoder};
+
+type Buffer = recode::util::ContextBuffer<Bytes, FrameHeader>;
+type BufferMut = recode::util::ContextBuffer<BytesMut, FrameHeader>;
 
 #[derive(Debug)]
 pub struct Frame {
