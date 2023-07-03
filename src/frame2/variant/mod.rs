@@ -1,11 +1,21 @@
 mod error;
 mod keepalive;
 mod lease;
+mod request_channel;
+mod request_fnf;
+mod request_n;
+mod request_response;
+mod request_stream;
 mod setup;
 
 pub use error::{Error, ErrorCode};
 pub use keepalive::Keepalive;
 pub use lease::Lease;
+pub use request_channel::RequestChannel;
+pub use request_fnf::RequestFNF;
+pub use request_n::RequestN;
+pub use request_response::RequestResponse;
+pub use request_stream::RequestStream;
 pub use setup::Setup;
 
 use derive_more::From;
@@ -19,6 +29,11 @@ pub enum FrameVariant {
     Error(Error),
     Lease(Lease),
     Keepalive(Keepalive),
+    RequestResponse(RequestResponse),
+    RequestFNF(RequestFNF),
+    RequestStream(RequestStream),
+    RequestChannel(RequestChannel),
+    RequestN(RequestN),
 }
 
 impl recode::Decoder<Buffer> for FrameVariant {
@@ -37,11 +52,24 @@ impl recode::Decoder<Buffer> for FrameVariant {
             ));
         }
 
+        #[inline(always)]
+        fn decode<T>(buf: &mut Buffer) -> Result<FrameVariant, crate::Error>
+        where
+            T: Decoder<Buffer, Error = crate::Error> + Into<FrameVariant>,
+        {
+            T::decode(buf).map(Into::into)
+        }
+
         match h.frame_type() {
-            | FrameType::Setup => Setup::decode(buf).map(Into::into),
-            | FrameType::Error => Error::decode(buf).map(Into::into),
-            | FrameType::Lease => Lease::decode(buf).map(Into::into),
-            | FrameType::Keepalive => Keepalive::decode(buf).map(Into::into),
+            | FrameType::Setup => decode::<Setup>(buf),
+            | FrameType::Error => decode::<Error>(buf),
+            | FrameType::Lease => decode::<Lease>(buf),
+            | FrameType::Keepalive => decode::<Keepalive>(buf),
+            | FrameType::RequestResponse => decode::<RequestResponse>(buf),
+            | FrameType::RequestFNF => decode::<RequestFNF>(buf),
+            | FrameType::RequestStream => decode::<RequestStream>(buf),
+            | FrameType::RequestChannel => decode::<RequestChannel>(buf),
+            | FrameType::RequestN => decode::<RequestN>(buf),
             | _ => unreachable!(),
         }
     }
@@ -56,6 +84,11 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::Error(v) => v.encode_to(buf),
             | FrameVariant::Lease(v) => v.encode_to(buf),
             | FrameVariant::Keepalive(v) => v.encode_to(buf),
+            | FrameVariant::RequestResponse(v) => v.encode_to(buf),
+            | FrameVariant::RequestFNF(v) => v.encode_to(buf),
+            | FrameVariant::RequestStream(v) => v.encode_to(buf),
+            | FrameVariant::RequestChannel(v) => v.encode_to(buf),
+            | FrameVariant::RequestN(v) => v.encode_to(buf),
         }
     }
 }
