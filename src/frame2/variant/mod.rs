@@ -2,6 +2,7 @@ mod cancel;
 mod error;
 mod keepalive;
 mod lease;
+mod metadata_push;
 mod payload;
 mod request_channel;
 mod request_fnf;
@@ -14,6 +15,7 @@ pub use cancel::Cancel;
 pub use error::{Error, ErrorCode};
 pub use keepalive::Keepalive;
 pub use lease::Lease;
+pub use metadata_push::MetadataPush;
 pub use payload::Payload;
 pub use request_channel::RequestChannel;
 pub use request_fnf::RequestFNF;
@@ -40,6 +42,7 @@ pub enum FrameVariant {
     RequestN(RequestN),
     Cancel(Cancel),
     Payload(Payload),
+    MetadataPush(MetadataPush),
 }
 
 impl recode::Decoder<Buffer> for FrameVariant {
@@ -78,6 +81,7 @@ impl recode::Decoder<Buffer> for FrameVariant {
             | FrameType::RequestN => decode::<RequestN>(buf),
             | FrameType::Cancel => decode::<Cancel>(buf),
             | FrameType::Payload => decode::<Payload>(buf),
+            | FrameType::MetadataPush => decode::<MetadataPush>(buf),
             | _ => unreachable!(),
         }
     }
@@ -99,6 +103,7 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::RequestN(v) => v.encode_to(buf),
             | FrameVariant::Cancel(v) => v.encode_to(buf),
             | FrameVariant::Payload(v) => v.encode_to(buf),
+            | FrameVariant::MetadataPush(v) => v.encode_to(buf),
         }
     }
 }
