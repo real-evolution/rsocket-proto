@@ -1,8 +1,10 @@
 mod error;
+mod keepalive;
 mod lease;
 mod setup;
 
 pub use error::{Error, ErrorCode};
+pub use keepalive::Keepalive;
 pub use lease::Lease;
 pub use setup::Setup;
 
@@ -16,6 +18,7 @@ pub enum FrameVariant {
     Setup(Setup),
     Error(Error),
     Lease(Lease),
+    Keepalive(Keepalive),
 }
 
 impl recode::Decoder<Buffer> for FrameVariant {
@@ -38,6 +41,7 @@ impl recode::Decoder<Buffer> for FrameVariant {
             | FrameType::Setup => Setup::decode(buf).map(Into::into),
             | FrameType::Error => Error::decode(buf).map(Into::into),
             | FrameType::Lease => Lease::decode(buf).map(Into::into),
+            | FrameType::Keepalive => Keepalive::decode(buf).map(Into::into),
             | _ => unreachable!(),
         }
     }
@@ -51,6 +55,7 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::Setup(v) => v.encode_to(buf),
             | FrameVariant::Error(v) => v.encode_to(buf),
             | FrameVariant::Lease(v) => v.encode_to(buf),
+            | FrameVariant::Keepalive(v) => v.encode_to(buf),
         }
     }
 }
