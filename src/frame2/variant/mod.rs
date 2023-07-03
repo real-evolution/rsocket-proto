@@ -10,6 +10,8 @@ mod request_fnf;
 mod request_n;
 mod request_response;
 mod request_stream;
+mod resume;
+mod resume_ok;
 mod setup;
 
 pub use cancel::Cancel;
@@ -24,6 +26,8 @@ pub use request_fnf::RequestFNF;
 pub use request_n::RequestN;
 pub use request_response::RequestResponse;
 pub use request_stream::RequestStream;
+pub use resume::Resume;
+pub use resume_ok::ResumeOk;
 pub use setup::Setup;
 
 use derive_more::From;
@@ -45,6 +49,8 @@ pub enum FrameVariant {
     Cancel(Cancel),
     Payload(Payload),
     MetadataPush(MetadataPush),
+    Resume(Resume),
+    ResumeOk(ResumeOk),
     Ext(Ext),
 }
 
@@ -85,8 +91,12 @@ impl recode::Decoder<Buffer> for FrameVariant {
             | FrameType::Cancel => decode::<Cancel>(buf),
             | FrameType::Payload => decode::<Payload>(buf),
             | FrameType::MetadataPush => decode::<MetadataPush>(buf),
+            | FrameType::Resume => decode::<Resume>(buf),
+            | FrameType::ResumeOk => decode::<ResumeOk>(buf),
             | FrameType::Ext => decode::<Ext>(buf),
-            | _ => unreachable!(),
+            | FrameType::Other(_) => Err(crate::Error::ProtocolViolation(
+                "unexpected frame type detected",
+            )),
         }
     }
 }
@@ -108,6 +118,8 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::Cancel(v) => v.encode_to(buf),
             | FrameVariant::Payload(v) => v.encode_to(buf),
             | FrameVariant::MetadataPush(v) => v.encode_to(buf),
+            | FrameVariant::Resume(v) => v.encode_to(buf),
+            | FrameVariant::ResumeOk(v) => v.encode_to(buf),
             | FrameVariant::Ext(v) => v.encode_to(buf),
         }
     }
