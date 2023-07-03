@@ -1,5 +1,4 @@
 mod header;
-mod mux;
 mod value_types;
 mod variant;
 
