@@ -1,20 +1,25 @@
 mod flags;
+mod stream_id;
 mod r#type;
 
 pub use flags::Flags;
 pub use r#type::FrameType;
+pub use stream_id::StreamId;
 
 /// A type to represent an rsocket frame header.
 #[derive(Debug, Clone, Copy, recode::Recode)]
 #[recode(error = "crate::Error")]
 pub struct FrameHeader {
-    stream_id: u32,
+    stream_id: StreamId,
     type_flags: u16,
 }
 
 impl FrameHeader {
+    /// The size of frame header in bytes.
+    pub const SIZE: usize = 6;
+
     /// Gets frame stream identifier.
-    pub const fn stream_id(&self) -> u32 {
+    pub const fn stream_id(&self) -> StreamId {
         self.stream_id
     }
 
