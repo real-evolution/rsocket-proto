@@ -6,6 +6,7 @@
 )]
 pub struct RequestStream {
     pub initial_request_n: super::NonZero<u32>,
+    #[recode(with = "super::Metadata")]
     pub metadata: Option<super::Metadata>,
     pub data: super::Data,
 }

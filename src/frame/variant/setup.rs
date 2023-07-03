@@ -11,6 +11,7 @@ pub struct Setup {
     token: super::ResumeToken,
     mime_metadata: super::MimeType,
     mime_data: super::MimeType,
+    #[recode(with = "super::Metadata")]
     metadata: Option<super::Metadata>,
     data: super::Data,
 }

@@ -40,7 +40,7 @@ impl Decoder<Buffer> for Metadata {
     }
 }
 
-impl Decoder<Buffer> for Option<Metadata> {
+impl Decoder<Buffer, Option<Metadata>> for Metadata {
     type Error = crate::Error;
 
     fn decode(buf: &mut Buffer) -> Result<Option<Metadata>, Self::Error> {
@@ -77,7 +77,7 @@ impl Encoder<BufferMut> for Metadata {
     }
 }
 
-impl Encoder<BufferMut> for Option<Metadata> {
+impl Encoder<BufferMut, Option<Metadata>> for Metadata {
     type Error = crate::Error;
 
     fn encode(

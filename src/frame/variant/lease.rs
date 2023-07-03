@@ -7,5 +7,6 @@
 pub struct Lease {
     pub ttl: super::NonZero<u32>,
     pub number_of_requests: super::NonZero<u32>,
+    #[recode(with = "super::Metadata")]
     pub metadata: Option<super::Metadata>,
 }

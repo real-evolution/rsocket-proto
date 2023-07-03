@@ -6,6 +6,7 @@
 )]
 pub struct Ext {
     pub extended_type: u32,
+    #[recode(with = "super::Metadata")]
     pub metadata: Option<super::Metadata>,
     pub data: super::Data,
 }

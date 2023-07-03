@@ -5,6 +5,7 @@
     encoder(buffer_type = "super::BufferMut")
 )]
 pub struct RequestFNF {
+    #[recode(with = "super::Metadata")]
     pub metadata: Option<super::Metadata>,
     pub data: super::Data,
 }

@@ -22,7 +22,7 @@ impl Decoder<super::Buffer> for Payload {
             ));
         }
 
-        let metadata = Option::<super::Metadata>::decode(buf)?;
+        let metadata = super::Metadata::decode(buf)?;
         let data = if buf.has_remaining() {
             if !buf.context().flags().contains(Flags::NEXT) {
                 return Err(crate::Error::ProtocolViolation(
@@ -58,7 +58,7 @@ impl Encoder<super::BufferMut> for Payload {
             "an attempt to encode payload with NEXT flag but without data",
         );
 
-        item.metadata.encode_to(buf)?;
+        super::Metadata::encode(&item.metadata, buf)?;
 
         if let Some(data) = &item.data {
             data.encode_to(buf)?;
