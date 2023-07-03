@@ -1,7 +1,8 @@
 #[derive(Debug, recode::Recode)]
 #[recode(
-    decoder(error = "crate::Error", buffer_type = "super::Buffer"),
-    encoder(error = "crate::Error", buffer_type = "super::BufferMut")
+    error = "crate::Error",
+    decoder(buffer_type = "super::Buffer"),
+    encoder(buffer_type = "super::BufferMut")
 )]
 pub struct Setup {
     version: super::Version,

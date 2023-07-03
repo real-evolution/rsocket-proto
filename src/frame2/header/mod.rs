@@ -6,7 +6,7 @@ pub use r#type::FrameType;
 
 /// A type to represent an rsocket frame header.
 #[derive(Debug, Clone, Copy, recode::Recode)]
-#[recode(decoder(error = "crate::Error"), encoder(error = "crate::Error"))]
+#[recode(error = "crate::Error")]
 pub struct FrameHeader {
     stream_id: u32,
     type_flags: u16,
