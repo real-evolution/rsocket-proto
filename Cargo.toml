@@ -12,9 +12,9 @@ publish = true
 
 [dependencies]
 bitflags = { version = "2" }
-recode = { version = "0", features = ["derive", "ux"] }
 derive_more = { version = "0" }
 from-to-repr = { version = "0", features = ["from_to_other"] }
 num = { version = "0" }
 paste = { version = "1" }
+recode = { path = "../recode/recode", features = ["derive", "ux"] }
 thiserror = { version = "1" }
