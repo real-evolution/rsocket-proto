@@ -6,7 +6,7 @@ use recode::bytes::{Buf, Bytes};
 use recode::util::EncoderExt;
 use recode::{codec, Decoder, Encoder};
 
-use crate::frame2::{Buffer, BufferMut, Flags, FrameType};
+use crate::frame::{Buffer, BufferMut, Flags, FrameType};
 
 type UnprefixedBuffer = codec::Buffer<recode::util::Remaining>;
 type PrefixedBuffer = codec::Buffer<codec::u24>;

@@ -1,6 +1,6 @@
 use recode::{bytes::Buf, util::EncoderExt, Decoder, Encoder};
 
-use crate::frame2::Flags;
+use crate::frame::Flags;
 
 #[derive(Debug, Clone)]
 pub struct Payload {
