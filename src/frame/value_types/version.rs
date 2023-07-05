@@ -1,4 +1,4 @@
-#[derive(Debug, Copy, Clone, Eq, PartialEq, recode::Recode)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default, recode::Recode)]
 #[recode(error = "crate::Error")]
 pub struct Version {
     pub major: u16,
