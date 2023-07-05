@@ -19,7 +19,7 @@ crate::define_builder! {
             pub token: super::ResumeToken => sets [RESUME];
             pub mime_metadata(required): super::MimeType;
             pub mime_data(required): super::MimeType;
-            pub metadata: Option<super::Metadata> => sets [METADATA];
+            pub metadata: Option<super::Metadata> => sets [METADATA if metadata.is_some()];
             pub data: super::Data;
         };
 
@@ -47,7 +47,7 @@ crate::define_builder! {
             // fields
             pub ttl(required): super::NonZero::<u32>;
             pub number_of_requests(required): super::NonZero::<u32>;
-            pub metadata: Option<super::Metadata> => sets [METADATA];
+            pub metadata: Option<super::Metadata> => sets [METADATA if metadata.is_some()];
         };
 
         //
@@ -76,7 +76,7 @@ crate::define_builder! {
             .incomplete => sets [FOLLOW];
 
             // fields
-            pub metadata: Option<super::Metadata> => sets [METADATA];
+            pub metadata: Option<super::Metadata> => sets [METADATA if metadata.is_some()];
             pub data: super::Data;
         };
 
@@ -90,7 +90,7 @@ crate::define_builder! {
             .incomplete => sets [FOLLOW];
 
             // fields
-            pub metadata: Option<super::Metadata> => sets [METADATA];
+            pub metadata: Option<super::Metadata> => sets [METADATA if metadata.is_some()];
             pub data: super::Data;
         };
 
@@ -105,7 +105,7 @@ crate::define_builder! {
 
             // fields
             pub initial_request_n(required): super::NonZero<u32>;
-            pub metadata: Option<super::Metadata> => sets [METADATA];
+            pub metadata: Option<super::Metadata> => sets [METADATA if metadata.is_some()];
             pub data: super::Data;
         };
 
@@ -115,12 +115,15 @@ crate::define_builder! {
         #[derive(Debug)]
         RequestChannelBuilder for super::RequestChannel: RequestChannel => {
             // terminals
-            .complete => sets [COMPLETE];
+            .build;
             .incomplete => sets [FOLLOW];
+
+            // flags
+            pub complete => sets [COMPLETE];
 
             // fields
             pub initial_request_n(required): super::NonZero<u32>;
-            pub metadata: Option<super::Metadata> => sets [METADATA];
+            pub metadata: Option<super::Metadata> => sets [METADATA if metadata.is_some()];
             pub data: super::Data;
         };
 
@@ -151,12 +154,18 @@ crate::define_builder! {
         #[derive(Debug)]
         PayloadBuilder for super::Payload: Payload => {
             // terminals
-            .complete => sets [COMPLETE];
+            .build;
             .incomplete => sets [FOLLOW];
 
+            // flags
+            pub complete => sets [COMPLETE];
+
             // fields
-            pub metadata: Option<super::Metadata> => sets [METADATA, NEXT];
-            pub data: Option<super::Data> => sets [NEXT];
+            pub metadata: Option<super::Metadata> => sets [
+                METADATA if metadata.is_some(),
+                NEXT if metadata.is_some()
+            ];
+            pub data: Option<super::Data> => sets [ NEXT if data.is_some() ];
         };
 
         //
