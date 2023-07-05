@@ -53,28 +53,52 @@ bitflags! {
 /// ```
 #[macro_export]
 macro_rules! const_flags {
-    () => {
-        $crate::frame::Flags::empty()
-    };
-
-    ($($t:tt)*) => {
-        $crate::frame::Flags::from_bits_truncate($crate::flags_to_bits!($($t)*))
+    ($($expr:tt)*) => {
+        $crate::process_flags_expr!(@entry: [ $($expr)* ] [] )
     };
 }
 
-/// Converts an expression that uses [`Flags`] constants into an expression
-/// that uses the backing vaue of [`Flags`] ([`u16`]).
+/// Recursively Converts an expression that uses [`Flags`] constants into
+/// an expression that uses the backing value of [`Flags`] ([`u16`]).
 #[macro_export]
-macro_rules! flags_to_bits {
-    ($x:ident) => {
-        $crate::frame::Flags::$x.bits()
+macro_rules! process_flags_expr {
+    (@entry: [ ] [ ]) => {
+        $crate::frame::Flags::empty()
     };
 
-    (($($t:tt)+)) => {
-        $crate::flags_to_bits!($($t)+)
+    (@entry: [ $($lhs:tt)+ ] [ ]) => {
+        $crate::process_flags_expr! {
+            @process:
+                [ $($lhs)+ ]
+                []
+        }
     };
 
-    ($lhs:ident $op:tt $($rest:tt)+) => {
-        $crate::frame::Flags::$lhs.bits() $op $crate::flags_to_bits!($($rest)+)
+    (@process: [ $flag:ident $($lhs:tt)* ] [ $($rhs:tt)* ]) => {
+        $crate::process_flags_expr! {
+            @process:
+                [ $($lhs)* ]
+                [ $($rhs)* $crate::frame::Flags::$flag.bits() ]
+        }
+    };
+
+    (@process: [ ( $($expr:tt)+ ) $($lhs:tt)* ] [ $($rhs:tt)* ]) => {
+        $crate::process_flags_expr! {
+            @process:
+                [ $($lhs)* ]
+                [ $($rhs)* $crate::const_flags!($($expr)+).bits() ]
+        }
+    };
+
+    (@process: [ $other:tt $($lhs:tt)* ] [ $($rhs:tt)* ]) => {
+        $crate::process_flags_expr! {
+            @process:
+                [ $($lhs)* ]
+                [ $($rhs)* $other ]
+        }
+    };
+
+    (@process: [ ] [ $($lhs:tt)+ ]) => {
+        $crate::frame::Flags::from_bits_truncate($($lhs)+)
     };
 }
