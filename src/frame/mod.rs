@@ -32,6 +32,11 @@ impl Frame {
     }
 
     #[inline]
+    pub(crate) fn variant_mut(&mut self) -> &mut FrameVariant {
+        &mut self.variant
+    }
+
+    #[inline]
     pub const fn builder() -> FrameBuilder {
         FrameBuilder(())
     }
