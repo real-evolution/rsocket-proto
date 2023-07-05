@@ -1,6 +1,4 @@
-use std::ops::Deref;
-
-use derive_more::Deref;
+use derive_more::{AsMut, AsRef, From, Into};
 
 use recode::bytes::{Buf, Bytes};
 use recode::util::EncoderExt;
@@ -12,7 +10,7 @@ type UnprefixedBuffer = codec::Buffer<recode::util::Remaining>;
 type PrefixedBuffer = codec::Buffer<codec::u24>;
 
 /// A value type wrapper to represent frames metadata.
-#[derive(Debug, Clone, Default, Deref)]
+#[derive(Debug, Clone, Default, Into, From, AsRef, AsMut)]
 pub struct Metadata(Bytes);
 
 impl Decoder<Buffer> for Metadata {
@@ -33,7 +31,7 @@ impl Decoder<Buffer> for Metadata {
 
         let inner = match buf.context().frame_type() {
             | FrameType::MetadataPush => buf.copy_to_bytes(buf.remaining()),
-            | _ => PrefixedBuffer::decode(buf)?.deref().clone(),
+            | _ => PrefixedBuffer::decode(buf)?.into_inner(),
         };
 
         Ok(Self(inner))
