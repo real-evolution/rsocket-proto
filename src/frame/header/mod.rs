@@ -18,6 +18,28 @@ impl FrameHeader {
     /// The size of frame header in bytes.
     pub const SIZE: usize = 6;
 
+    /// Creates a new frame header.
+    ///
+    /// # Parameters
+    /// - `stream_id`: A stream identifier.
+    /// - `frame_type`: A frame type.
+    /// - `flags`: Frame flags.
+    ///
+    /// # Returns
+    /// A new frame header.
+    pub(crate) const fn new(
+        stream_id: StreamId,
+        frame_type: FrameType,
+        flags: Flags,
+    ) -> Self {
+        let frame_type = (frame_type.to_base_type() as u16) << 10;
+
+        Self {
+            stream_id,
+            type_flags: frame_type | flags.bits(),
+        }
+    }
+
     /// Gets frame stream identifier.
     pub const fn stream_id(&self) -> StreamId {
         self.stream_id
