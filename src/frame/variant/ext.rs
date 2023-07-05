@@ -5,8 +5,8 @@
     encoder(buffer_type = "super::BufferMut")
 )]
 pub struct Ext {
-    pub extended_type: u32,
+    pub(crate) extended_type: u32,
     #[recode(with = "super::Metadata")]
-    pub metadata: Option<super::Metadata>,
-    pub data: super::Data,
+    pub(crate) metadata: Option<super::Metadata>,
+    pub(crate) data: super::Data,
 }

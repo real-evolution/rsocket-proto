@@ -5,5 +5,5 @@
     encoder(buffer_type = "super::BufferMut")
 )]
 pub struct MetadataPush {
-    pub metadata: super::Metadata,
+    pub(crate) metadata: super::Metadata,
 }

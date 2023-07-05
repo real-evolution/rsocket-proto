@@ -1,10 +1,10 @@
-use recode::{util::EncoderExt, Decoder, Encoder};
+use recode::{util::EncoderExt, Decoder, Encoder, Recode};
 
-#[derive(Debug, recode::Recode)]
+#[derive(Debug, Recode)]
 #[recode(error = "crate::Error")]
 pub struct Error {
-    pub code: ErrorCode,
-    pub data: recode::codec::Utf8,
+    pub(crate) code: ErrorCode,
+    pub(crate) data: recode::codec::Utf8,
 }
 
 #[derive(Debug, Clone)]

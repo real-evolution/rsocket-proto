@@ -5,13 +5,13 @@
     encoder(buffer_type = "super::BufferMut")
 )]
 pub struct Setup {
-    version: super::Version,
-    keepalive: super::NonZero<u32>,
-    lifetime: super::NonZero<u32>,
-    token: super::ResumeToken,
-    mime_metadata: super::MimeType,
-    mime_data: super::MimeType,
+    pub(crate) version: super::Version,
+    pub(crate) keepalive: super::NonZero<u32>,
+    pub(crate) lifetime: super::NonZero<u32>,
+    pub(crate) token: super::ResumeToken,
+    pub(crate) mime_metadata: super::MimeType,
+    pub(crate) mime_data: super::MimeType,
     #[recode(with = "super::Metadata")]
-    metadata: Option<super::Metadata>,
-    data: super::Data,
+    pub(crate) metadata: Option<super::Metadata>,
+    pub(crate) data: super::Data,
 }

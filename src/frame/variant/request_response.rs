@@ -6,6 +6,6 @@
 )]
 pub struct RequestResponse {
     #[recode(with = "super::Metadata")]
-    pub metadata: Option<super::Metadata>,
-    pub data: super::Data,
+    pub(crate) metadata: Option<super::Metadata>,
+    pub(crate) data: super::Data,
 }

@@ -4,8 +4,8 @@ use crate::frame::Flags;
 
 #[derive(Debug, Clone)]
 pub struct Payload {
-    pub metadata: Option<super::Metadata>,
-    pub data: Option<super::Data>,
+    pub(crate) metadata: Option<super::Metadata>,
+    pub(crate) data: Option<super::Data>,
 }
 
 impl Decoder<super::Buffer> for Payload {

@@ -5,5 +5,5 @@
     encoder(buffer_type = "super::BufferMut")
 )]
 pub struct ResumeOk {
-    pub last_received_client_position: u64,
+    pub(crate) last_received_client_position: u64,
 }
