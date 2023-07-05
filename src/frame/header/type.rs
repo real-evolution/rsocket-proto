@@ -1,6 +1,6 @@
 use from_to_repr::from_to_other;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, derive_more::Display)]
 #[from_to_other(base_type = u8)]
 #[repr(u8)]
 pub enum FrameType {
