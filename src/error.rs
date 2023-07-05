@@ -12,6 +12,12 @@ pub enum Error {
 
     #[error("protocol violation: {0}")]
     ProtocolViolation(&'static str),
+
+    #[error("missing value of `{frame_type} :: {field}'")]
+    MissingFieldValue {
+        frame_type: crate::frame::FrameType,
+        field: &'static str,
+    },
 }
 
 impl From<std::convert::Infallible> for Error {
