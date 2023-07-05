@@ -1,7 +1,9 @@
+mod builder;
 mod header;
 mod value_types;
 mod variant;
 
+pub use builder::*;
 pub use header::*;
 pub use value_types::*;
 pub use variant::*;
@@ -27,6 +29,11 @@ impl Frame {
     #[inline]
     pub fn variant(&self) -> &FrameVariant {
         &self.variant
+    }
+
+    #[inline]
+    pub const fn builder() -> FrameBuilder {
+        FrameBuilder(())
     }
 }
 
