@@ -44,7 +44,9 @@ macro_rules! define_builder {
                         $( $(($mod:ident))? : $field_ty:ty )?
 
                         $( =>
-                           $( sets [ $($flag:ident),* ] )?
+                           $( sets [
+                              $($flag:ident $(if $flags_cond:expr)?),*
+                           ])?
                         )?
                     );+
                     ;
@@ -69,13 +71,13 @@ macro_rules! define_builder {
                 $($(
                     #[inline]
                     $field_vis fn $field(mut self $(, $field: $field_ty)?) -> Self {
-                        $( self.$field = Option::<$field_ty>::Some($field); )?
-
-                        $(
-                            $($(
+                        $($($(
+                            $( if $flags_cond )? {
                                 self.__flags.insert($crate::frame::Flags::$flag);
-                            )*)?
-                         )?
+                            }
+                        )*)?)?
+
+                        $( self.$field = Option::<$field_ty>::Some($field); )?
 
                         self
                     }
