@@ -1,11 +1,8 @@
-use derive_more::{From, Into};
+use either::Either::{self, Left, Right};
 use recode::bytes::{BufMut, Bytes, BytesMut};
 
 use crate::frame::*;
 use crate::io::mux::variant::FragmentableVariant;
-
-#[derive(Debug, From, Into)]
-pub(super) struct FragmentError(FrameVariant);
 
 #[derive(Debug)]
 pub(super) struct Fragment<const MTU: usize> {
@@ -15,14 +12,14 @@ pub(super) struct Fragment<const MTU: usize> {
 }
 
 impl<const MTU: usize> Fragment<MTU> {
-    pub(super) fn new(variant: FrameVariant) -> Result<Self, FragmentError> {
+    pub(super) fn new(variant: FrameVariant) -> Either<Self, FrameVariant> {
         match variant {
             | FrameVariant::RequestResponse(v) => Self::new_inner(v),
             | FrameVariant::RequestFNF(v) => Self::new_inner(v),
             | FrameVariant::RequestStream(v) => Self::new_inner(v),
             | FrameVariant::RequestChannel(v) => Self::new_inner(v),
             | FrameVariant::Payload(v) => Self::new_inner(v),
-            | _ => return Err(variant.into()),
+            | _ => Right(variant),
         }
     }
 
@@ -30,10 +27,10 @@ impl<const MTU: usize> Fragment<MTU> {
     pub(super) fn append(
         &mut self,
         variant: FrameVariant,
-    ) -> Result<(), FragmentError> {
+    ) -> Option<FrameVariant> {
         let mut payload = match variant {
             | FrameVariant::Payload(p) => p,
-            | _ => return Err(variant.into()),
+            | _ => return Some(variant),
         };
 
         if let Some(mut metadata) = payload.metadata.take() {
@@ -44,19 +41,19 @@ impl<const MTU: usize> Fragment<MTU> {
             self.metadata.put(data.as_inner_mut())
         }
 
-        Ok(())
+        None
     }
 
     #[inline]
-    fn new_inner<V>(mut variant: V) -> Result<Self, FragmentError>
+    fn new_inner<V>(mut variant: V) -> Either<Self, FrameVariant>
     where
         V: FragmentableVariant + Into<FrameVariant>,
     {
         if variant.adjusted_len() <= MTU - FrameHeader::SIZE {
-            return Err(variant.into().into());
+            return Right(variant.into());
         }
 
-        Ok(Self {
+        Left(Self {
             metadata: Self::take_mut(variant.metadata()),
             data: Self::take_mut(variant.data()),
             variant: variant.into(),

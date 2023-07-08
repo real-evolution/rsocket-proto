@@ -2,6 +2,7 @@ mod fragment;
 mod parts;
 
 use dashmap::{mapref::one::RefMut, DashMap};
+use either::Either::{Left, Right};
 
 use crate::frame::{Frame, StreamId};
 use parts::FrameParts;
@@ -39,8 +40,8 @@ impl<const MTU: usize> Defragmenter<MTU> {
         let stream_id = frame.header().stream_id();
 
         let is_complete = match parts.append(frame) {
-            | Ok(is_complete) => is_complete,
-            | Err(err) => return Ok(Some(err.into())),
+            | Left(is_complete) => is_complete,
+            | Right(frame) => return Ok(Some(frame)),
         };
 
         if is_complete {
@@ -58,8 +59,8 @@ impl<const MTU: usize> Defragmenter<MTU> {
     #[inline]
     fn insert_frame(&self, frame: Frame) -> crate::Result<Option<Frame>> {
         let parts = match FrameParts::<MTU>::new(frame) {
-            | Ok(parts) => parts,
-            | Err(err) => return Ok(Some(err.into())),
+            | Left(parts) => parts,
+            | Right(frame) => return Ok(Some(frame)),
         };
 
         match self.fragments.insert(parts.header().stream_id(), parts) {

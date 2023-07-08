@@ -1,10 +1,7 @@
-use derive_more::{From, Into};
+use either::Either::{self, Left, Right};
 
 use super::fragment::Fragment;
 use crate::frame::{Flags, Frame, FrameHeader};
-
-#[derive(Debug, From, Into)]
-pub(super) struct FramePartsError(Frame);
 
 #[derive(Debug)]
 pub(super) struct FrameParts<const MTU: usize> {
@@ -15,41 +12,38 @@ pub(super) struct FrameParts<const MTU: usize> {
 
 impl<const MTU: usize> FrameParts<MTU> {
     #[inline]
-    pub(super) fn new(frame: Frame) -> Result<Self, FramePartsError> {
+    pub(super) fn new(frame: Frame) -> Either<Self, Frame> {
         if !frame.header().flags().contains(Flags::FOLLOW) {
-            return Err(frame.into());
+            return Right(frame);
         }
 
         let (header, variant) = frame.split();
         let fragment = match Fragment::<MTU>::new(variant) {
-            | Ok(fragment) => fragment,
-            | Err(err) => return Err(Frame::new(header, err.into()).into()),
+            | Left(fragment) => fragment,
+            | Right(variant) => return Right(Frame::new(header, variant)),
         };
 
-        Ok(Self {
+        Left(Self {
             header,
             fragment,
             is_complete: false,
         })
     }
 
-    pub(super) fn append(
-        &mut self,
-        frame: Frame,
-    ) -> Result<bool, FramePartsError> {
+    pub(super) fn append(&mut self, frame: Frame) -> Either<bool, Frame> {
         assert!(!self.is_complete, "frame is complete");
 
         let (header, variant) = frame.split();
 
-        self.fragment.append(variant).map_err(move |err| {
-            FramePartsError(Frame::new(header, err.into()))
-        })?;
+        if let Some(variant) = self.fragment.append(variant) {
+            return Right(Frame::new(header, variant));
+        }
 
         if !header.flags().contains(Flags::FOLLOW) {
             self.is_complete = true;
         }
 
-        Ok(self.is_complete)
+        Left(self.is_complete)
     }
 
     #[inline]
