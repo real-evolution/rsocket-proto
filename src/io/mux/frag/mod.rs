@@ -1,5 +1,3 @@
-mod variant;
-
 use recode::bytes::Bytes;
 
 use crate::frame::{Frame, FrameVariant, StreamId};
@@ -12,9 +10,7 @@ pub struct Fragmenter<const MTU: usize> {
 }
 
 impl<const MTU: usize> Fragmenter<MTU> {
-    pub fn fragment(
-        mut frame: Frame,
-    ) -> impl Iterator<Item = crate::Result<Frame>> {
+    pub fn fragment(mut frame: Frame) -> impl Iterator<Item = Frame> {
         let (metadata, data) = Self::trim_frame(&mut frame);
 
         let iter = Self {
@@ -23,12 +19,12 @@ impl<const MTU: usize> Fragmenter<MTU> {
             data,
         };
 
-        std::iter::once(Ok(frame)).chain(iter)
+        std::iter::once(frame).chain(iter)
     }
 
     #[inline]
     fn trim_frame(frame: &mut Frame) -> (Bytes, Bytes) {
-        use variant::FragmentableVariant;
+        use super::variant::FragmentableVariant;
 
         match frame.variant_mut() {
             | FrameVariant::RequestResponse(ref mut v) => v.trim_to(MTU),
@@ -55,7 +51,7 @@ impl<const MTU: usize> Fragmenter<MTU> {
 }
 
 impl<const MTU: usize> Iterator for Fragmenter<MTU> {
-    type Item = crate::Result<Frame>;
+    type Item = Frame;
 
     fn next(&mut self) -> Option<Self::Item> {
         let (len, metadata) = Self::take_from(&mut self.metadata, MTU);
@@ -72,9 +68,9 @@ impl<const MTU: usize> Iterator for Fragmenter<MTU> {
             .data(data.map(Into::into));
 
         if self.has_remaining() {
-            return Some(builder.incomplete());
+            return Some(builder.incomplete().unwrap());
         }
 
-        Some(builder.build())
+        Some(builder.build().unwrap())
     }
 }
