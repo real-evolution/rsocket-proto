@@ -18,6 +18,18 @@ pub enum Error {
         frame_type: crate::frame::FrameType,
         field: &'static str,
     },
+
+    #[error(
+        "unexpected end of a `{}` frame in stream #{:?}: {}",
+        frame_type,
+        stream_id,
+        message
+    )]
+    UnexpectedEndOfFrame {
+        stream_id: crate::frame::StreamId,
+        frame_type: crate::frame::FrameType,
+        message: &'static str,
+    },
 }
 
 impl From<std::convert::Infallible> for Error {

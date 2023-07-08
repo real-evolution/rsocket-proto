@@ -1,3 +1,3 @@
 mod mux;
 
-pub use mux::{Defragmenter, Fragmenter};
+pub use mux::{Fragmenter, Defragmenter};
