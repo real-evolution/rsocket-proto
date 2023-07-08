@@ -159,6 +159,7 @@ crate::define_builder! {
 
             // flags
             pub complete => sets [COMPLETE];
+            pub next => sets [NEXT];
 
             // fields
             pub metadata: Option<super::Metadata> => sets [
