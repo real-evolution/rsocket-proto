@@ -22,6 +22,11 @@ pub struct Frame {
 
 impl Frame {
     #[inline]
+    pub(crate) fn new(header: FrameHeader, variant: FrameVariant) -> Self {
+        Self { header, variant }
+    }
+
+    #[inline]
     pub fn header(&self) -> &FrameHeader {
         &self.header
     }
@@ -39,6 +44,11 @@ impl Frame {
     #[inline]
     pub const fn builder() -> FrameBuilder {
         FrameBuilder(())
+    }
+
+    #[inline]
+    pub(crate) fn split(self) -> (FrameHeader, FrameVariant) {
+        (self.header, self.variant)
     }
 }
 
