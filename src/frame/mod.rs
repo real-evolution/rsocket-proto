@@ -79,4 +79,11 @@ impl Encoder<BytesMut> for Frame {
 
         Ok(())
     }
+
+    #[inline]
+    fn size_of(item: &Self, buf: &BytesMut) -> usize {
+        let buf_wrapper = BufferMut::new(buf.clone(), item.header);
+
+        item.header().size(buf) + item.variant().size(&buf_wrapper)
+    }
 }

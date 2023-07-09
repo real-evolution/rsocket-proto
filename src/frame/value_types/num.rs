@@ -38,4 +38,9 @@ where
     fn encode(item: &Self, buf: &mut B) -> Result<(), Self::Error> {
         item.encode_to(buf)
     }
+
+    #[inline]
+    fn size_of(item: &Self, buf: &B) -> usize {
+        T::size_of(&item.0, buf)
+    }
 }

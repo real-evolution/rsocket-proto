@@ -79,6 +79,17 @@ impl Encoder<BufferMut> for Metadata {
         }
         .map_err(Into::into)
     }
+
+    #[inline]
+    fn size_of(item: &Self, buf: &BufferMut) -> usize {
+        let len = item.0.len();
+
+        if let FrameType::MetadataPush = buf.context().frame_type() {
+            return len;
+        }
+
+        len + 3
+    }
 }
 
 impl Encoder<BufferMut, Option<Metadata>> for Metadata {
@@ -109,6 +120,15 @@ impl Encoder<BufferMut, Option<Metadata>> for Metadata {
         };
 
         item.encode_to(buf)
+    }
+
+    #[inline]
+    fn size_of(item: &Option<Metadata>, buf: &BufferMut) -> usize {
+        if let Some(ref item) = item {
+            return item.size(buf);
+        }
+
+        0
     }
 }
 

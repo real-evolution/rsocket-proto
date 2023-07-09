@@ -106,6 +106,7 @@ impl recode::Decoder<Buffer> for FrameVariant {
 impl recode::Encoder<BufferMut> for FrameVariant {
     type Error = crate::Error;
 
+    #[inline]
     fn encode(item: &Self, buf: &mut BufferMut) -> Result<(), crate::Error> {
         match item {
             | FrameVariant::Setup(v) => v.encode_to(buf),
@@ -123,6 +124,27 @@ impl recode::Encoder<BufferMut> for FrameVariant {
             | FrameVariant::Resume(v) => v.encode_to(buf),
             | FrameVariant::ResumeOk(v) => v.encode_to(buf),
             | FrameVariant::Ext(v) => v.encode_to(buf),
+        }
+    }
+
+    #[inline]
+    fn size_of(item: &Self, buf: &BufferMut) -> usize {
+        match item {
+            | FrameVariant::Setup(v) => v.size(buf),
+            | FrameVariant::Error(v) => v.size(buf),
+            | FrameVariant::Lease(v) => v.size(buf),
+            | FrameVariant::Keepalive(v) => v.size(buf),
+            | FrameVariant::RequestResponse(v) => v.size(buf),
+            | FrameVariant::RequestFNF(v) => v.size(buf),
+            | FrameVariant::RequestStream(v) => v.size(buf),
+            | FrameVariant::RequestChannel(v) => v.size(buf),
+            | FrameVariant::RequestN(v) => v.size(buf),
+            | FrameVariant::Cancel(v) => v.size(buf),
+            | FrameVariant::Payload(v) => v.size(buf),
+            | FrameVariant::MetadataPush(v) => v.size(buf),
+            | FrameVariant::Resume(v) => v.size(buf),
+            | FrameVariant::ResumeOk(v) => v.size(buf),
+            | FrameVariant::Ext(v) => v.size(buf),
         }
     }
 }

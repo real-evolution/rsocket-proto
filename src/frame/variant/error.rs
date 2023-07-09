@@ -42,7 +42,13 @@ where
 {
     type Error = crate::Error;
 
+    #[inline]
     fn encode(item: &Self, buf: &mut B) -> Result<(), Self::Error> {
         item.to_base_type().encode_to(buf).map_err(Into::into)
+    }
+
+    #[inline]
+    fn size_of(item: &Self, buf: &B) -> usize {
+        item.to_base_type().size(buf)
     }
 }

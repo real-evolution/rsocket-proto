@@ -70,4 +70,12 @@ impl Encoder<super::BufferMut> for Payload {
 
         Ok(())
     }
+
+    fn size_of(item: &Self, buf: &super::BufferMut) -> usize {
+        let metadata_len = super::Metadata::size_of(&item.metadata, buf);
+        let data_len =
+            item.data.as_ref().map(|b| b.size(buf)).unwrap_or_default();
+
+        metadata_len + data_len
+    }
 }
