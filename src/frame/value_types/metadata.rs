@@ -18,15 +18,19 @@ impl Decoder<Buffer> for Metadata {
 
     fn decode(buf: &mut Buffer) -> Result<Metadata, Self::Error> {
         if !buf.context().flags().contains(Flags::METADATA) {
-            return Err(Self::Error::ProtocolViolation(
-                "frame header does not contain metadata flag",
-            ));
+            return Err(Self::Error::MissingFlag {
+                flag: Flags::METADATA,
+                frame_type: buf.context().frame_type(),
+                message: "METADATA flag is missing, but metadata is present",
+            });
         }
 
         if !buf.context().frame_type().supports_metadata() {
-            return Err(Self::Error::ProtocolViolation(
-                "frame does not support metadata",
-            ));
+            return Err(Self::Error::UnexpectedFlag {
+                flag: Flags::METADATA,
+                frame_type: buf.context().frame_type(),
+                message: "metadata is not supported for this frame",
+            });
         }
 
         let inner = match buf.context().frame_type() {
@@ -44,9 +48,11 @@ impl Decoder<Buffer, Option<Metadata>> for Metadata {
     fn decode(buf: &mut Buffer) -> Result<Option<Metadata>, Self::Error> {
         if !buf.context().flags().contains(Flags::METADATA) {
             return if buf.context().frame_type().requires_metadata() {
-                Err(Self::Error::ProtocolViolation(
-                    "METADATA_PUSH frame type requires metadata",
-                ))
+                Err(Self::Error::MissingFlag {
+                    flag: Flags::METADATA,
+                    frame_type: buf.context().frame_type(),
+                    message: "frame requires metadata",
+                })
             } else {
                 Ok(None)
             };
@@ -83,16 +89,20 @@ impl Encoder<BufferMut, Option<Metadata>> for Metadata {
         buf: &mut BufferMut,
     ) -> Result<(), Self::Error> {
         if buf.context().flags().contains(Flags::METADATA) ^ item.is_some() {
-            return Err(Self::Error::ProtocolViolation(
-                "incosistent METADATA flag",
-            ));
+            return Err(Self::Error::UnexpectedFlag {
+                flag: Flags::METADATA,
+                frame_type: buf.context().frame_type(),
+                message: "METADATA flag is inconsistent with metadata presence",
+            });
         }
 
         let Some(ref item) = item else {
             if buf.context().frame_type().requires_metadata() {
-                return Err(Self::Error::ProtocolViolation(
-                    "METADATA_PUSH frame type requires metadata",
-                ));
+                return Err(Self::Error::MissingFlag {
+                    flag: Flags::METADATA,
+                    frame_type: buf.context().frame_type(),
+                    message: "frame requires metadata",
+                })
             }
 
             return Ok(());

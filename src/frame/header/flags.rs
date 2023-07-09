@@ -1,8 +1,9 @@
 use bitflags::bitflags;
+use derive_more::Display;
 
 bitflags! {
     /// A flags structure to represent possible fram flags.
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Display)]
     pub struct Flags: u16 {
         /// (N)ext: bit to indicate Next (Payload Data and/or Metadata present).
         ///

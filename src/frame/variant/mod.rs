@@ -65,9 +65,11 @@ impl recode::Decoder<Buffer> for FrameVariant {
             .complement()
             .intersects(h.flags())
         {
-            return Err(crate::Error::ProtocolViolation(
-                "unexpected flags detected",
-            ));
+            return Err(crate::Error::UnexpectedFlag {
+                flag: h.flags(),
+                frame_type: h.frame_type(),
+                message: "unexpected flags detected",
+            });
         }
 
         #[inline(always)]
@@ -94,9 +96,9 @@ impl recode::Decoder<Buffer> for FrameVariant {
             | FrameType::Resume => decode::<Resume>(buf),
             | FrameType::ResumeOk => decode::<ResumeOk>(buf),
             | FrameType::Ext => decode::<Ext>(buf),
-            | FrameType::Other(_) => Err(crate::Error::ProtocolViolation(
-                "unexpected frame type detected",
-            )),
+            | FrameType::Other(_) => {
+                Err(crate::Error::UnsupportedFrameType(h.frame_type()))
+            }
         }
     }
 }

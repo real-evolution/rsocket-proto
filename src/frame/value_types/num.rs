@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use derive_more::Deref;
 use recode::{util::EncoderExt, Decoder, Encoder};
 
@@ -6,7 +8,7 @@ pub struct NonZero<T>(T);
 
 impl<B, T> Decoder<B> for NonZero<T>
 where
-    T: Decoder<B> + num::Num,
+    T: Display + Decoder<B> + num::Num,
     crate::Error: From<T::Error>,
 {
     type Error = crate::Error;
@@ -15,9 +17,10 @@ where
         let value = T::decode(buf)?;
 
         if value.is_zero() {
-            return Err(crate::Error::ProtocolViolation(
-                "field does not allow decoding from zro",
-            ));
+            return Err(crate::Error::InvalidValue(format!(
+                "non-zero values allow, got: {}",
+                value
+            )));
         }
 
         Ok(Self(value))

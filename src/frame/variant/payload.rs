@@ -1,6 +1,6 @@
 use recode::{bytes::Buf, util::EncoderExt, Decoder, Encoder};
 
-use crate::frame::Flags;
+use crate::{const_flags, frame::Flags};
 
 #[derive(Debug, Clone)]
 pub struct Payload {
@@ -17,17 +17,21 @@ impl Decoder<super::Buffer> for Payload {
             .flags()
             .contains(Flags::COMPLETE | Flags::NEXT)
         {
-            return Err(crate::Error::ProtocolViolation(
-                "payloads cannot have both COMPLETE and NEXT flags set",
-            ));
+            return Err(Self::Error::UnexpectedFlag {
+                flag: const_flags![COMPLETE | NEXT],
+                frame_type: buf.context().frame_type(),
+                message: "frame cannot have both COMPLETE and NEXT flags set",
+            });
         }
 
         let metadata = super::Metadata::decode(buf)?;
         let data = if buf.has_remaining() {
             if !buf.context().flags().contains(Flags::NEXT) {
-                return Err(crate::Error::ProtocolViolation(
-                    "payloads without NEXT flag must be empty",
-                ));
+                return Err(Self::Error::UnexpectedFlag {
+                    flag: Flags::NEXT,
+                    frame_type: buf.context().frame_type(),
+                    message: "payloads without NEXT flag must be empty",
+                });
             }
 
             Some(super::Data::decode(buf)?)
