@@ -47,6 +47,17 @@ pub enum Error {
         frame_type: crate::frame::FrameType,
         field: &'static str,
     },
+
+    #[error("too large frame of type `{frame_type}': {size} > {max_size}")]
+    TooLargeFrame {
+        frame_type: crate::frame::FrameType,
+        size: usize,
+        max_size: usize,
+    },
+
+    #[cfg(feature = "codec")]
+    #[error("i/o error: {0}")]
+    Io(#[from] std::io::Error),
 }
 
 impl From<std::convert::Infallible> for Error {

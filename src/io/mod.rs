@@ -1,3 +1,6 @@
 mod mux;
 
-pub use mux::{Fragmenter, Defragmenter};
+pub use mux::{Defragmenter, Fragmenter};
+
+#[cfg(feature = "codec")]
+pub mod codec;
