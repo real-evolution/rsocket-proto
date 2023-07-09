@@ -10,7 +10,15 @@ license-file = "LICENSE"
 readme = true
 publish = true
 
+[features]
+default = ["codec"]
+codec = ["tokio-util/codec"]
+
 [dependencies]
+# optional dependencies
+tokio-util = { version = "0", optional = true }
+
+# required dependencies
 bitflags = { version = "2" }
 dashmap = { version = "5" }
 derive_more = { version = "0" }
