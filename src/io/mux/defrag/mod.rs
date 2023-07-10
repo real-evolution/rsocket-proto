@@ -1,11 +1,12 @@
 mod fragment;
 mod parts;
 
-use dashmap::{mapref::one::RefMut, DashMap};
+use dashmap::mapref::one::RefMut;
+use dashmap::DashMap;
 use either::Either::{Left, Right};
-
-use crate::frame::{Frame, StreamId};
 use parts::FrameParts;
+
+use crate::frame::{Frame, FrameType, StreamId};
 
 #[derive(Debug, Default)]
 pub struct Defragmenter<const MTU: usize> {
@@ -19,6 +20,12 @@ impl<const MTU: usize> Defragmenter<MTU> {
     }
 
     pub fn defragment(&self, frame: Frame) -> crate::Result<Option<Frame>> {
+        if let FrameType::Cancel = frame.header().frame_type() {
+            self.fragments.remove(&frame.header().stream_id());
+
+            return Ok(None);
+        }
+
         self.defragment_inner(frame)
     }
 
@@ -30,7 +37,6 @@ impl<const MTU: usize> Defragmenter<MTU> {
         }
     }
 
-    #[inline]
     fn append_frame(
         &self,
         parts: RefMut<'_, StreamId, FrameParts<MTU>>,
@@ -56,7 +62,6 @@ impl<const MTU: usize> Defragmenter<MTU> {
         Ok(None)
     }
 
-    #[inline]
     fn insert_frame(&self, frame: Frame) -> crate::Result<Option<Frame>> {
         let parts = match FrameParts::<MTU>::new(frame) {
             | Left(parts) => parts,
