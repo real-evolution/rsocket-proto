@@ -3,13 +3,14 @@ mod header;
 mod value_types;
 mod variant;
 
-pub use builder::*;
-pub use header::*;
-pub use value_types::*;
-pub use variant::*;
-
 use recode::bytes::{Bytes, BytesMut};
-use recode::{util::EncoderExt, Decoder, Encoder};
+use recode::util::EncoderExt;
+use recode::{Decoder, Encoder};
+
+pub use self::builder::FrameBuilder;
+pub use self::header::*;
+pub use self::value_types::*;
+pub use self::variant::*;
 
 type Buffer = recode::util::ContextBuffer<Bytes, FrameHeader>;
 type BufferMut = recode::util::ContextBuffer<BytesMut, FrameHeader>;

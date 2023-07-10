@@ -9,11 +9,13 @@ pub struct StreamId {
 
 impl StreamId {
     /// Creates a new stream identifier.
+    #[inline]
     pub const fn new(inner: u32) -> Self {
         Self { inner }
     }
 
     /// Gets whether the stream identifier is connection stream identifier.
+    #[inline]
     pub const fn is_cnnection(&self) -> bool {
         self.inner == 0
     }
