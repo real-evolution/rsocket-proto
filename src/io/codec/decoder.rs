@@ -1,4 +1,6 @@
-use recode::{bytes::Buf, codec::u24, Decoder as _};
+use recode::bytes::Buf;
+use recode::codec::u24;
+use recode::Decoder as _;
 use tokio_util::codec::Decoder;
 
 use crate::frame::Frame;
@@ -16,8 +18,8 @@ pub struct FrameDecoder<const MTU: usize = { super::MAX_FRAME_LEN }> {
 }
 
 impl<const MTU: usize> Decoder for FrameDecoder<MTU> {
-    type Item = Frame;
     type Error = crate::Error;
+    type Item = Frame;
 
     fn decode(
         &mut self,
@@ -37,6 +39,8 @@ impl<const MTU: usize> Decoder for FrameDecoder<MTU> {
 
                 let mut buf = src.split_to(len).freeze();
                 let frame = Frame::decode(&mut buf)?;
+
+                self.state = FrameDecoderState::Header;
 
                 Ok(Some(frame))
             }

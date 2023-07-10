@@ -1,7 +1,8 @@
 use tokio_util::codec::Encoder;
 
 use crate::frame::Frame;
-use crate::io::{codec::FrameEncoder, Fragmenter};
+use crate::io::codec::FrameEncoder;
+use crate::io::Fragmenter;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct FragmentedFrameEncoder<const MTU: usize>;
