@@ -20,10 +20,12 @@ impl<const MTU: usize> Defragmenter<MTU> {
     }
 
     pub fn defragment(&self, frame: Frame) -> crate::Result<Option<Frame>> {
-        if let FrameType::Cancel = frame.header().frame_type() {
-            self.fragments.remove(&frame.header().stream_id());
+        let stream_id = frame.header().stream_id();
 
-            return Ok(None);
+        if let FrameType::Cancel = frame.header().frame_type() {
+            if self.fragments.remove(&stream_id).is_none() {
+                return Ok(Some(frame));
+            }
         }
 
         self.defragment_inner(frame)
