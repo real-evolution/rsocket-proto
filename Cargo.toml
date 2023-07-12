@@ -24,6 +24,7 @@ dashmap = { version = "5" }
 derive_more = { version = "0" }
 either = { version = "1" }
 from-to-repr = { version = "0", features = ["from_to_other"] }
+derive-getters = { version = "0" }
 num = { version = "0" }
 paste = { version = "1" }
 recode = { path = "../recode/recode", features = ["derive", "ux"] }

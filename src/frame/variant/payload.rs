@@ -1,8 +1,12 @@
-use recode::{bytes::Buf, util::EncoderExt, Decoder, Encoder};
+use derive_getters::Getters;
+use recode::bytes::Buf;
+use recode::util::EncoderExt;
+use recode::{Decoder, Encoder};
 
-use crate::{const_flags, frame::Flags};
+use crate::const_flags;
+use crate::frame::Flags;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Getters)]
 pub struct Payload {
     pub(crate) metadata: Option<super::Metadata>,
     pub(crate) data: Option<super::Data>,

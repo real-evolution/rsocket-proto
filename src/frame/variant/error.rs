@@ -1,6 +1,8 @@
-use recode::{util::EncoderExt, Decoder, Encoder, Recode};
+use derive_getters::Getters;
+use recode::util::EncoderExt;
+use recode::{Decoder, Encoder, Recode};
 
-#[derive(Debug, Recode)]
+#[derive(Debug, Getters, Recode)]
 #[recode(error = "crate::Error")]
 pub struct Error {
     pub(crate) code: ErrorCode,

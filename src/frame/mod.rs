@@ -3,6 +3,7 @@ mod header;
 mod value_types;
 mod variant;
 
+use derive_getters::{Dissolve, Getters};
 use recode::bytes::{Bytes, BytesMut};
 use recode::util::EncoderExt;
 use recode::{Decoder, Encoder};
@@ -15,7 +16,8 @@ pub use self::variant::*;
 type Buffer = recode::util::ContextBuffer<Bytes, FrameHeader>;
 type BufferMut = recode::util::ContextBuffer<BytesMut, FrameHeader>;
 
-#[derive(Debug)]
+#[derive(Debug, Getters, Dissolve)]
+#[dissolve(rename = "split")]
 pub struct Frame {
     header: FrameHeader,
     variant: FrameVariant,
@@ -28,16 +30,6 @@ impl Frame {
     }
 
     #[inline]
-    pub fn header(&self) -> &FrameHeader {
-        &self.header
-    }
-
-    #[inline]
-    pub fn variant(&self) -> &FrameVariant {
-        &self.variant
-    }
-
-    #[inline]
     pub(crate) fn variant_mut(&mut self) -> &mut FrameVariant {
         &mut self.variant
     }
@@ -45,11 +37,6 @@ impl Frame {
     #[inline]
     pub const fn builder() -> FrameBuilder {
         FrameBuilder(())
-    }
-
-    #[inline]
-    pub(crate) fn split(self) -> (FrameHeader, FrameVariant) {
-        (self.header, self.variant)
     }
 }
 
