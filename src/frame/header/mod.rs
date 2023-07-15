@@ -54,4 +54,10 @@ impl FrameHeader {
     pub const fn flags(&self) -> Flags {
         Flags::from_bits_truncate(self.type_flags % 0x03FF)
     }
+
+    /// A shorthand for `self.flags().contains(flag)`.
+    #[inline]
+    pub const fn has_flag(&self, flag: Flags) -> bool {
+        self.flags().contains(flag)
+    }
 }
