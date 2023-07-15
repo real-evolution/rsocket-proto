@@ -4,6 +4,7 @@ use recode::Recode;
 #[derive(Debug, Clone, Getters, Recode)]
 #[recode(
     error = "crate::Error",
+    buffer_name = "buf",
     decoder(buffer_type = "super::Buffer"),
     encoder(buffer_type = "super::BufferMut")
 )]
@@ -11,6 +12,7 @@ pub struct Setup {
     pub(crate) version: super::Version,
     pub(crate) keepalive: super::NonZero<u32>,
     pub(crate) max_lifetime: super::NonZero<u32>,
+    #[recode(skip_if = "!buf.context().has_flag(super::Flags::RESUME)")]
     pub(crate) token: super::ResumeToken,
     pub(crate) mime_metadata: super::MimeType,
     pub(crate) mime_data: super::MimeType,
