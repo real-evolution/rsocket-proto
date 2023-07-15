@@ -17,7 +17,7 @@ impl<const MTU: usize> Encoder<Frame> for FragmentedFrameEncoder<MTU> {
         dst: &mut recode::bytes::BytesMut,
     ) -> Result<(), Self::Error> {
         for f in Fragmenter::<MTU>::fragment(item) {
-            FrameEncoder::<MTU>.encode(f, dst)?;
+            FrameEncoder.encode(f, dst)?;
         }
 
         Ok(())

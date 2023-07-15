@@ -4,9 +4,9 @@ use tokio_util::codec::Encoder;
 use crate::frame::Frame;
 
 #[derive(Debug, Default, Clone, Copy)]
-pub struct FrameEncoder<const MTU: usize = { super::MAX_FRAME_LEN }>;
+pub struct FrameEncoder;
 
-impl<const MTU: usize> Encoder<Frame> for FrameEncoder<MTU> {
+impl Encoder<Frame> for FrameEncoder {
     type Error = crate::Error;
 
     fn encode(
@@ -16,7 +16,7 @@ impl<const MTU: usize> Encoder<Frame> for FrameEncoder<MTU> {
     ) -> Result<(), Self::Error> {
         let frame_len = item.size(dst);
 
-        if frame_len <= MTU {
+        if frame_len <= super::MAX_FRAME_LEN {
             if let Ok(frame_len) = TryInto::<u24>::try_into(frame_len) {
                 dst.reserve(frame_len.size(dst) + item.size(dst));
 
@@ -28,7 +28,7 @@ impl<const MTU: usize> Encoder<Frame> for FrameEncoder<MTU> {
         Err(Self::Error::TooLargeFrame {
             frame_type: item.header().frame_type(),
             size: frame_len,
-            max_size: MTU,
+            max_size: super::MAX_FRAME_LEN,
         })
     }
 }

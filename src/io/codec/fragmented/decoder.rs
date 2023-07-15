@@ -6,7 +6,7 @@ use crate::io::Defragmenter;
 
 #[derive(Debug, Default)]
 pub struct FragmentedFrameDecoder<const MTU: usize> {
-    decoder: FrameDecoder<MTU>,
+    decoder: FrameDecoder,
     defragmenter: Defragmenter<MTU>,
 }
 
