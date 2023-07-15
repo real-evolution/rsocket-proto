@@ -15,7 +15,7 @@ crate::define_builder! {
             // fields
             pub version: super::Version;
             pub keepalive(required): super::NonZero<u32>;
-            pub lifetime(required): super::NonZero<u32>;
+            pub max_lifetime(required): super::NonZero<u32>;
             pub token: super::ResumeToken => sets [RESUME];
             pub mime_metadata(required): super::MimeType;
             pub mime_data(required): super::MimeType;

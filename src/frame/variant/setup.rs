@@ -10,7 +10,7 @@ use recode::Recode;
 pub struct Setup {
     pub(crate) version: super::Version,
     pub(crate) keepalive: super::NonZero<u32>,
-    pub(crate) lifetime: super::NonZero<u32>,
+    pub(crate) max_lifetime: super::NonZero<u32>,
     pub(crate) token: super::ResumeToken,
     pub(crate) mime_metadata: super::MimeType,
     pub(crate) mime_data: super::MimeType,
