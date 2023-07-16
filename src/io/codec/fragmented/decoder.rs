@@ -1,6 +1,6 @@
 use tokio_util::codec::Decoder;
 
-use crate::frame::Frame;
+use crate::frame::TaggedFrame;
 use crate::io::codec::FrameDecoder;
 use crate::io::Defragmenter;
 
@@ -12,7 +12,7 @@ pub struct FragmentedFrameDecoder<const MTU: usize> {
 
 impl<const MTU: usize> Decoder for FragmentedFrameDecoder<MTU> {
     type Error = crate::Error;
-    type Item = Frame;
+    type Item = TaggedFrame;
 
     #[inline]
     fn decode(

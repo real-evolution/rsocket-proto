@@ -3,7 +3,7 @@ use recode::codec::u24;
 use recode::Decoder as _;
 use tokio_util::codec::Decoder;
 
-use crate::frame::Frame;
+use crate::frame::TaggedFrame;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub enum FrameDecoder {
@@ -14,7 +14,7 @@ pub enum FrameDecoder {
 
 impl Decoder for FrameDecoder {
     type Error = crate::Error;
-    type Item = Frame;
+    type Item = TaggedFrame;
 
     fn decode(
         &mut self,
@@ -33,7 +33,7 @@ impl Decoder for FrameDecoder {
                 }
 
                 let mut buf = src.split_to(*len).freeze();
-                let frame = Frame::decode(&mut buf)?;
+                let frame = TaggedFrame::decode(&mut buf)?;
 
                 *self = Self::Header;
 

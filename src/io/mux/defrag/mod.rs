@@ -6,7 +6,7 @@ use dashmap::DashMap;
 use either::Either::{Left, Right};
 use parts::FrameParts;
 
-use crate::frame::{Frame, FrameType, StreamId};
+use crate::frame::{FrameType, StreamId, TaggedFrame};
 
 #[derive(Debug, Default)]
 pub struct Defragmenter<const MTU: usize> {
@@ -19,37 +19,43 @@ impl<const MTU: usize> Defragmenter<MTU> {
         Self::default()
     }
 
-    pub fn defragment(&self, frame: Frame) -> crate::Result<Option<Frame>> {
-        let stream_id = frame.header().stream_id();
-
-        if let FrameType::Cancel = frame.header().frame_type() {
-            if self.fragments.remove(&stream_id).is_none() {
-                return Ok(Some(frame));
+    pub fn defragment(
+        &self,
+        tagged: TaggedFrame,
+    ) -> crate::Result<Option<TaggedFrame>> {
+        if let FrameType::Cancel = tagged.frame().header().frame_type() {
+            if self.fragments.remove(tagged.stream_id()).is_none() {
+                return Ok(Some(tagged));
             }
         }
 
-        self.defragment_inner(frame)
+        self.defragment_inner(tagged)
     }
 
     #[inline]
-    fn defragment_inner(&self, frame: Frame) -> crate::Result<Option<Frame>> {
-        match self.fragments.get_mut(&frame.header().stream_id()) {
-            | Some(parts) => self.append_frame(parts, frame),
-            | None => self.insert_frame(frame),
+    fn defragment_inner(
+        &self,
+        tagged: TaggedFrame,
+    ) -> crate::Result<Option<TaggedFrame>> {
+        match self.fragments.get_mut(tagged.stream_id()) {
+            | Some(parts) => self.append_frame(parts, tagged),
+            | None => self.insert_frame(tagged),
         }
     }
 
     fn append_frame(
         &self,
         parts: RefMut<'_, StreamId, FrameParts<MTU>>,
-        frame: Frame,
-    ) -> crate::Result<Option<Frame>> {
+        tagged: TaggedFrame,
+    ) -> crate::Result<Option<TaggedFrame>> {
         let mut parts = parts;
-        let stream_id = frame.header().stream_id();
+        let (stream_id, frame) = tagged.split();
 
         let is_complete = match parts.append(frame) {
             | Left(is_complete) => is_complete,
-            | Right(frame) => return Ok(Some(frame)),
+            | Right(frame) => {
+                return Ok(Some(TaggedFrame::new(stream_id, frame)))
+            }
         };
 
         if is_complete {
@@ -57,22 +63,29 @@ impl<const MTU: usize> Defragmenter<MTU> {
             drop(parts);
 
             if let Some(entry) = self.fragments.remove(&stream_id) {
-                return Ok(Some(entry.1.into()));
+                return Ok(Some(TaggedFrame::new(stream_id, entry.1.into())));
             }
         }
 
         Ok(None)
     }
 
-    fn insert_frame(&self, frame: Frame) -> crate::Result<Option<Frame>> {
+    fn insert_frame(
+        &self,
+        tagged: TaggedFrame,
+    ) -> crate::Result<Option<TaggedFrame>> {
+        let (stream_id, frame) = tagged.split();
+
         let parts = match FrameParts::<MTU>::new(frame) {
             | Left(parts) => parts,
-            | Right(frame) => return Ok(Some(frame)),
+            | Right(frame) => {
+                return Ok(Some(TaggedFrame::new(stream_id, frame)))
+            }
         };
 
-        match self.fragments.insert(parts.header().stream_id(), parts) {
+        match self.fragments.insert(stream_id, parts) {
             | Some(existing) => Err(crate::Error::UnexpectedEndOfFrame {
-                stream_id: existing.header().stream_id(),
+                stream_id,
                 frame_type: existing.header().frame_type(),
                 message: "new frame started before previous was finished",
             }),

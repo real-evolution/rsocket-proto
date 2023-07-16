@@ -1,19 +1,19 @@
 use tokio_util::codec::Encoder;
 
-use crate::frame::Frame;
+use crate::frame::TaggedFrame;
 use crate::io::codec::FrameEncoder;
 use crate::io::Fragmenter;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct FragmentedFrameEncoder<const MTU: usize>;
 
-impl<const MTU: usize> Encoder<Frame> for FragmentedFrameEncoder<MTU> {
+impl<const MTU: usize> Encoder<TaggedFrame> for FragmentedFrameEncoder<MTU> {
     type Error = crate::Error;
 
     #[inline]
     fn encode(
         &mut self,
-        item: Frame,
+        item: TaggedFrame,
         dst: &mut recode::bytes::BytesMut,
     ) -> Result<(), Self::Error> {
         for f in Fragmenter::<MTU>::fragment(item) {

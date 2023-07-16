@@ -1,6 +1,6 @@
 use recode::bytes::Bytes;
 
-use crate::frame::{Frame, FrameVariant, StreamId};
+use crate::frame::{Frame, FrameVariant, StreamId, TaggedFrame};
 
 #[derive(Debug)]
 pub struct Fragmenter<const MTU: usize> {
@@ -10,23 +10,24 @@ pub struct Fragmenter<const MTU: usize> {
 }
 
 impl<const MTU: usize> Fragmenter<MTU> {
-    pub fn fragment(mut frame: Frame) -> impl Iterator<Item = Frame> {
-        let (metadata, data) = Self::trim_frame(&mut frame);
+    pub fn fragment(
+        mut tagged: TaggedFrame,
+    ) -> impl Iterator<Item = TaggedFrame> {
+        let stream_id = *tagged.stream_id();
+        let (metadata, data) = Self::trim_frame(&mut tagged);
 
-        let iter = Self {
-            stream_id: frame.header().stream_id(),
+        std::iter::once(tagged).chain(Self {
+            stream_id,
             metadata,
             data,
-        };
-
-        std::iter::once(frame).chain(iter)
+        })
     }
 
     #[inline]
-    fn trim_frame(frame: &mut Frame) -> (Bytes, Bytes) {
+    fn trim_frame(tagged: &mut TaggedFrame) -> (Bytes, Bytes) {
         use super::variant::FragmentableVariant;
 
-        match frame.variant_mut() {
+        match tagged.frame_mut().variant_mut() {
             | FrameVariant::RequestResponse(ref mut v) => v.trim_to(MTU),
             | FrameVariant::RequestFNF(ref mut v) => v.trim_to(MTU),
             | FrameVariant::RequestStream(ref mut v) => v.trim_to(MTU),
@@ -51,7 +52,7 @@ impl<const MTU: usize> Fragmenter<MTU> {
 }
 
 impl<const MTU: usize> Iterator for Fragmenter<MTU> {
-    type Item = Frame;
+    type Item = TaggedFrame;
 
     fn next(&mut self) -> Option<Self::Item> {
         let (len, metadata) = Self::take_from(&mut self.metadata, MTU);
@@ -62,15 +63,14 @@ impl<const MTU: usize> Iterator for Fragmenter<MTU> {
         }
 
         let builder = Frame::builder()
-            .stream_id(self.stream_id)
             .payload()
             .metadata(metadata.map(Into::into))
             .data(data.map(Into::into));
 
         if self.has_remaining() {
-            return Some(builder.incomplete().unwrap());
+            return Some(builder.incomplete().unwrap().tagged(self.stream_id));
         }
 
-        Some(builder.build().unwrap())
+        Some(builder.build().unwrap().tagged(self.stream_id))
     }
 }
