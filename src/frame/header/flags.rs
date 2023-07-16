@@ -45,12 +45,15 @@ bitflags! {
 ///
 /// # Example
 /// ```rust
-///  struct MyType;
+/// #[macro_use]
+/// use rsocket_proto::frame::Flags;
+/// use rsocket_proto::const_flags;
 ///
-///  impl MyType {
-///     const FLAGS_MASK: Flags = crate::const_flags![METADATA | RESUME | LEASE];
-///  }
+/// struct MyType;
 ///
+/// impl MyType {
+///     const FLAGS_MASK: Flags = const_flags![METADATA | RESUME | LEASE];
+/// }
 /// ```
 #[macro_export]
 macro_rules! const_flags {
