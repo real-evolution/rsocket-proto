@@ -47,6 +47,20 @@ impl Frame {
     pub const fn builder() -> FrameBuilder {
         FrameBuilder(())
     }
+
+    /// Converts this frame into an instance of [`TaggedFrame`] using the
+    /// supplied stream identifier, consuming [`self`].
+    ///
+    /// # Parameters
+    /// * `stream_id` - The stream identifier to tag this frame with.
+    ///
+    /// # Returns
+    /// An instance of [`TaggedFrame`] composed of this frame and the supplied
+    /// stream identifier.
+    #[inline]
+    pub fn tagged(self, stream_id: StreamId) -> TaggedFrame {
+        TaggedFrame::new(stream_id, self)
+    }
 }
 
 impl Decoder<Bytes> for Frame {
