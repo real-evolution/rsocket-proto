@@ -1,5 +1,6 @@
 mod builder;
 mod header;
+mod tagged;
 mod value_types;
 mod variant;
 
@@ -10,12 +11,19 @@ use recode::{Decoder, Encoder};
 
 pub use self::builder::FrameBuilder;
 pub use self::header::*;
+pub use self::tagged::TaggedFrame;
 pub use self::value_types::*;
 pub use self::variant::*;
 
 type Buffer = recode::util::ContextBuffer<Bytes, FrameHeader>;
 type BufferMut = recode::util::ContextBuffer<BytesMut, FrameHeader>;
 
+/// A frame is the basic unit of communication between peers of the protocol.
+///
+/// Each frame consists of a header followed by a payload. The header contains
+/// information about the frame (namely, the frame payload type, and the frame
+/// flags) that is necessary for its processing. The payload contains the actual
+/// data being communicated.
 #[derive(Debug, Getters, Dissolve)]
 #[dissolve(rename = "split")]
 pub struct Frame {
@@ -34,6 +42,7 @@ impl Frame {
         &mut self.variant
     }
 
+    /// Gets a builder for creating a frame.
     #[inline]
     pub const fn builder() -> FrameBuilder {
         FrameBuilder(())
