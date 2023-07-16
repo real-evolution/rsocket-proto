@@ -57,7 +57,7 @@ impl FrameHeader {
 
     /// A shorthand for `self.flags().contains(flag)`.
     #[inline]
-    pub const fn has_flag(&self, flag: Flags) -> bool {
+    pub const fn has(&self, flag: Flags) -> bool {
         self.flags().contains(flag)
     }
 }

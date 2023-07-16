@@ -12,7 +12,7 @@ pub struct Setup {
     pub(crate) version: super::Version,
     pub(crate) keepalive: super::NonZero<u32>,
     pub(crate) max_lifetime: super::NonZero<u32>,
-    #[recode(skip_if = "!buf.context().has_flag(super::Flags::RESUME)")]
+    #[recode(skip_if = "!buf.context().has(super::Flags::RESUME)")]
     pub(crate) token: super::ResumeToken,
     pub(crate) mime_metadata: super::MimeType,
     pub(crate) mime_data: super::MimeType,
