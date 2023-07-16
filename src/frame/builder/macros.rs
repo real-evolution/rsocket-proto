@@ -57,7 +57,6 @@ macro_rules! define_builder {
         $(
             $( #[$($builder_meta)*] )*
             pub struct $name {
-                __stream_id: $crate::frame::StreamId,
                 __flags: $crate::frame::Flags,
                 $(
                     $( $($field: Option<$field_ty>,)? )+
@@ -85,7 +84,6 @@ macro_rules! define_builder {
 
                 fn __build(self) -> $crate::Result<$crate::frame::Frame> {
                     let header = $crate::frame::FrameHeader::new(
-                        self.__stream_id,
                         Self::FRAME_TYPE,
                         self.__flags,
                     );
@@ -114,7 +112,7 @@ macro_rules! define_builder {
         )*
 
         $( #[$($top_meta)*] )*
-        pub struct $top_name(pub(super) $crate::frame::StreamId);
+        pub struct $top_name(pub(crate) ());
 
         impl $top_name {
             $(
@@ -122,7 +120,6 @@ macro_rules! define_builder {
                     #[inline]
                     pub fn [<$ftype:snake>](self) -> $name {
                         $name {
-                            __stream_id: self.0,
                             __flags: $crate::frame::Flags::empty(),
                             $($(
                                 $( $field: Option::<$field_ty>::None, )?
