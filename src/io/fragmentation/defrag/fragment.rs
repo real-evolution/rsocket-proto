@@ -2,7 +2,7 @@ use either::Either::{self, Left, Right};
 use recode::bytes::{BufMut, Bytes, BytesMut};
 
 use crate::frame::*;
-use crate::io::mux::variant::FragmentableVariant;
+use crate::io::fragmentation::variant::FragmentableVariant;
 
 #[derive(Debug)]
 pub(super) struct Fragment<const MTU: usize> {
