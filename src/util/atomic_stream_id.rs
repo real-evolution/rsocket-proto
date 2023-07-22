@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use crate::frame::StreamId;
 
 #[derive(Debug)]
-pub struct AtomicStreamId<const STEP: u32> {
+pub struct AtomicStreamId<const STEP: u32 = 2> {
     current: AtomicU32,
 }
 
