@@ -29,7 +29,7 @@ impl<const STEP: u32> AtomicStreamId<STEP> {
     pub fn next(&self) -> StreamId {
         let value = self.current.fetch_add(STEP, Ordering::Relaxed);
 
-        StreamId::new(value - STEP)
+        StreamId::new(value)
     }
 
     #[inline]
